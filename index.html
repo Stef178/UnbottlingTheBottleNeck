@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Statiegeld in beeld</title>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+  <header>
+    <h1>♻️ Statiegeld in beeld</h1>
+    <h2>De route naar recycling</h2>
+  </header>
+
+  <main class="visual">
+    <!-- stappen -->
+    <div class="step kopen"      style="--x:10;   --y:50;">
+      <img src="assets/icons/kopen.svg" alt="Kopen"/><p>Kopen</p>
+    </div>
+    <div class="step opbergen"   style="--x:31.7; --y:30;">
+      <img src="assets/icons/opbergen.svg" alt="Opbergen"/><p>Opbergen</p>
+    </div>
+    <div class="step consumeren" style="--x:54.2; --y:33.3;">
+      <img src="assets/icons/consumeren.svg" alt="Consumeren"/><p>Consumeren</p>
+    </div>
+    <div class="step recyclen"   style="--x:79.2; --y:33.3;">
+      <img src="assets/icons/recyclen.svg" alt="Recyclen"/><p>Recyclen</p>
+    </div>
+    <div class="step weggooien"  style="--x:25;   --y:70;">
+      <img src="assets/icons/weggooien.svg" alt="Weggooien"/><p>Weggooien</p>
+    </div>
+    <div class="step inleveren"  style="--x:70.8; --y:70;">
+      <img src="assets/icons/inleveren.svg" alt="Inleveren"/><p>Inleveren</p>
+    </div>
+    <div class="step doneren"    style="--x:87.5; --y:70;">
+      <img src="assets/icons/doneren.svg" alt="Doneren"/><p>Doneren</p>
+    </div>
+
+    <!-- pijlen -->
+    <svg class="arrows" viewBox="0 0 1200 600" preserveAspectRatio="none">
+      <defs>
+        <marker id="arrow" markerWidth="10" markerHeight="10" refX="6" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L9,3 z" fill="black"/>
+        </marker>
+      </defs>
+      <path d="M150,300 Q250,150 400,250" stroke="black" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+      <path d="M400,250 Q550,150 700,250" stroke="black" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+      <path d="M700,250 Q850,150 1000,250" stroke="black" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+      <path d="M400,250 Q400,400 250,450" stroke="black" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+      <path d="M1000,250 Q1000,400 850,450" stroke="black" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+    </svg>
+  </main>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
