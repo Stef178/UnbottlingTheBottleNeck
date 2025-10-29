@@ -11,12 +11,12 @@ h2 { margin:6px 0 0; font-weight:400; }
 .visual{
   position:relative;
   width:min(1200px, 95vw);
-  aspect-ratio: 1200 / 600;           /* houdt verhouding exact gelijk aan viewBox */
+  aspect-ratio: 1200 / 600;    
   margin:24px auto;
   background:transparent;
 }
 
-/* stappen als percentages t.o.v. viewBox; center op het punt */
+
 .step{
   position:absolute;
   left:calc(var(--x)*1%); top:calc(var(--y)*1%);
@@ -30,8 +30,10 @@ h2 { margin:6px 0 0; font-weight:400; }
 }
 .step:hover img{ transform:scale(1.08); }
 
-/* pijlen vullen hele canvas en schalen mee */
-.arrows{
-  position:absolute; inset:0; width:100%; height:100%;
-  pointer-events:none;
+.node{
+  position:absolute;
+  left:calc(var(--x)*1%);
+  top:calc(var(--y)*1%);
+  transform:translate(-50%,-50%);
 }
+
