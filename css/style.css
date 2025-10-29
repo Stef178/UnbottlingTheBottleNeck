@@ -1,39 +1,55 @@
 :root { --w:1200; --h:600; }
 
 body {
-  background:#eaf6e4; font-family:Poppins, system-ui, sans-serif;
-  margin:0; text-align:center;
+  background:#eaf6e4;
+  font-family:Poppins, system-ui, sans-serif;
+  margin:0;
+  text-align:center;
 }
-header { border-bottom:2px solid #333; padding:20px 0; }
+
+header {
+  border-bottom:2px solid #333;
+  padding:20px 0;
+}
 h1 { margin:0; font-size:1.8rem; }
 h2 { margin:6px 0 0; font-weight:400; }
 
-.visual{
+.visual {
   position:relative;
-  width:min(1200px, 95vw);
-  aspect-ratio: 1200 / 600;    
+  width:min(1200px,95vw);
+  aspect-ratio:1200/600;
   margin:24px auto;
   background:transparent;
 }
 
-
-.step{
+/* stappen */
+.step {
   position:absolute;
-  left:calc(var(--x)*1%); top:calc(var(--y)*1%);
+  left:calc((var(--x) + 20) * 1%);   /* <-- alles 20% naar rechts geschoven */
+  top:calc(var(--y)*1%);
   transform:translate(-50%,-50%);
-  text-align:center; user-select:none;
+  text-align:center;
+  user-select:none;
 }
-.step img{ width:80px; height:auto; transition:transform .2s; }
-.step p{
-  display:inline-block; margin:.4rem 0 0; padding:4px 10px;
-  background:#aef59d; border-radius:6px; font-size:.9rem;
+.step img {
+  width:80px;
+  height:auto;
+  transition:transform .2s;
 }
-.step:hover img{ transform:scale(1.08); }
+.step p {
+  display:inline-block;
+  margin:.4rem 0 0;
+  padding:4px 10px;
+  background:#aef59d;
+  border-radius:6px;
+  font-size:.9rem;
+}
+.step:hover img { transform:scale(1.08); }
 
-.node{
+/* lijnen/nodes (zelfde correctie) */
+.node {
   position:absolute;
-  left:calc(var(--x)*1%);
+  left:calc((var(--x) + 20) * 1%);   /* <-- zelfde verschuiving */
   top:calc(var(--y)*1%);
   transform:translate(-50%,-50%);
 }
-
