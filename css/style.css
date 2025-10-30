@@ -1,55 +1,139 @@
-:root { --w:1200; --h:600; }
-
+:root {
+  --w: 1200;
+  --h: 600;
+}
 body {
-  background:#eaf6e4;
-  font-family:Poppins, system-ui, sans-serif;
-  margin:0;
-  text-align:center;
+  background: #eaf6e4;
+  font-family: Poppins, system-ui, sans-serif;
+  margin: 0;
+  text-align: center;
+  overflow: hidden;
 }
 
 header {
-  border-bottom:2px solid #333;
-  padding:20px 0;
+  background: #aef59d;
+  padding: 20px 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
-h1 { margin:0; font-size:1.8rem; }
-h2 { margin:6px 0 0; font-weight:400; }
 
+header h1 {
+  margin: 0;
+  font-size: 2rem;
+  color: #2d5016;
+}
+
+.header-line {
+  width: 100%;
+  height: 3px;
+  background: #7ec46a;
+  margin: 0;
+}
 .visual {
-  position:relative;
-  width:min(1200px,95vw);
-  aspect-ratio:1200/600;
-  margin:24px auto;
-  background:transparent;
+  position: relative;
+  width: min(1200px, 95vw);
+  aspect-ratio: 1200/600;
+  margin: 24px auto;
 }
-
-/* stappen */
 .step {
-  position:absolute;
-  left:calc((var(--x) + 20) * 1%);   /* <-- alles 20% naar rechts geschoven */
-  top:calc(var(--y)*1%);
-  transform:translate(-50%,-50%);
-  text-align:center;
-  user-select:none;
+  position: absolute;
+  left: calc((var(--x) + 20) * 1%);
+  top: calc(var(--y) * 1%);
+  transform: translate(-50%, -50%);
+  text-align: center;
+  cursor: pointer;
 }
 .step img {
-  width:80px;
-  height:auto;
-  transition:transform .2s;
+  width: 80px;
+  transition: transform 0.2s;
+}
+.step:hover img {
+  transform: scale(1.08);
 }
 .step p {
-  display:inline-block;
-  margin:.4rem 0 0;
-  padding:4px 10px;
-  background:#aef59d;
-  border-radius:6px;
-  font-size:.9rem;
+  background: #aef59d;
+  padding: 4px 10px;
+  border-radius: 6px;
+  margin-top: 0.4rem;
+  display: inline-block;
 }
-.step:hover img { transform:scale(1.08); }
-
-/* lijnen/nodes (zelfde correctie) */
 .node {
-  position:absolute;
-  left:calc((var(--x) + 20) * 1%);   /* <-- zelfde verschuiving */
-  top:calc(var(--y)*1%);
-  transform:translate(-50%,-50%);
+  position: absolute;
+  left: calc((var(--x) + 20) * 1%);
+  top: calc(var(--y) * 1%);
+  transform: translate(-50%, -50%);
+}
+#fridge-image {
+  width: 85px;
+  height: auto;
+  transition: transform 0.4s ease;
+  z-index: 5;
+  position: relative;
+}
+#fridge-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+#fridge-overlay.active {
+  display: flex;
+}
+#fridge-overlay #open-fridge {
+  width: 520px;
+  height: auto;
+  z-index: 1000;
+  position: relative;
+}
+.fridge-shelves {
+  position: absolute;
+  top: 58%;
+  left: 45%;
+  width: 260px;
+  height: 500px;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  z-index: 1001;
+  pointer-events: none;
+}
+.shelf {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 8px;
+  height: 70px;
+  flex-wrap: wrap;
+}
+#shelf-top .item {
+  width: 28px;
+  height: 80px;
+  margin-top: 35px;
+}
+#shelf-middle-top .item {
+  width: 22px;
+  height: 80px;
+  margin-top: -10px;
+}
+#shelf-middle-bottom .item {
+  width: 30px;
+  height: 170px;
+  margin-top: -200px;
+}
+#shelf-bottom .item {
+  width: 38px;
+  height: 270px;
+  margin-top: -300px;
+}
+.item {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+.item.visible {
+  opacity: 1;
+  transform: translateY(0);
 }
