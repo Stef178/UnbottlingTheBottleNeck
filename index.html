@@ -1,127 +1,83 @@
 <!DOCTYPE html>
 <html lang="nl">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Statiegeld in beeld</title>
-    <link rel="stylesheet" href="css/style.css" />
-  </head>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Statiegeld in beeld</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
 
-  <body>
-    <header>
-      <div class="header-content">
-        <img
-          src="assets/icons/recycle.svg"
-          alt="Recycle"
-          class="recycle-icon left"
-        />
-        <div class="header-text">
-          <h1>Statiegeld in beeld</h1>
-          <h2>De route naar recycling</h2>
-        </div>
-        <img
-          src="assets/icons/recycle.svg"
-          alt="Recycle"
-          class="recycle-icon right"
-        />
+<body>
+  <header>
+    <div class="header-content">
+      <img src="assets/icons/recycle.svg" alt="Recycle" class="recycle-icon left"/>
+      <div class="header-text">
+        <h1>Statiegeld in beeld</h1>
+        <h2>De route naar recycling</h2>
       </div>
-    </header>
+      <img src="assets/icons/recycle.svg" alt="Recycle" class="recycle-icon right"/>
+    </div>
+  </header>
 
-    <main class="visual">
-      <div class="step kopen" style="--x: -27; --y: 60">
-        <img src="assets/icons/kopen.svg" alt="Kopen" />
-        <p>Kopen</p>
-      </div>
+  <main class="visual">
+    <!-- stappen -->
+    <div class="step kopen" style="--x: -25; --y: 57">
+      <img src="assets/icons/kopen.svg" alt="Kopen" />
+      <p>Kopen</p>
+    </div>
 
-      <div class="step opbergen" style="--x: -7; --y: 110">
-        <div class="fridge-wrapper">
-          <img
-            id="fridge-image"
-            src="assets/icons/opbergen.svg"
-            alt="Koelkast gesloten"
-          />
-        </div>
-        <p>Opbergen</p>
+    <div class="step opbergen" style="--x: -5; --y: 110">
+      <div class="fridge-wrapper">
+        <img id="fridge-image" src="assets/icons/opbergen.svg" alt="Koelkast gesloten" />
       </div>
+      <p>Opbergen</p>
+    </div>
 
-      <div class="step consumeren" style="--x: -5; --y: 20">
-        <img src="assets/icons/consumeren.svg" alt="Consumeren" />
-        <p>Consumeren</p>
-      </div>
+    <div class="step consumeren" style="--x: -5; --y: 20">
+      <img src="assets/icons/consumeren.svg" alt="Consumeren" />
+      <p>Consumeren</p>
+    </div>
 
-      <div class="step verzamelen" style="--x: 43; --y: 58">
-        <img src="assets/icons/recyclen.svg" alt="Verzamelen" />
-        <p>Verzamelen</p>
-      </div>
+    <div class="step verzamelen" style="--x: 43; --y: 58">
+      <img src="assets/icons/recyclen.svg" alt="Verzamelen" />
+      <p>Verzamelen</p>
+    </div>
 
-      <div class="step weggooien" style="--x: 38; --y: 107">
-        <img src="assets/icons/weggooien.svg" alt="Weggooien" />
-        <p>Weggooien</p>
-      </div>
+    <div class="step weggooien" style="--x: 38; --y: 107">
+      <img src="assets/icons/weggooien.svg" alt="Weggooien" />
+      <p>Weggooien</p>
+    </div>
 
-      <div class="step inleveren" style="--x: 75; --y: 20">
-        <img
-          src="assets/icons/inleveren.svg"
-          alt="Inleveren"
-          style="width: 150px; height: 80px"
-        />
-        <p>Inleveren / Doneren</p>
-      </div>
+    <div class="step inleveren" style="--x: 75; --y: 20">
+      <img src="assets/icons/inleveren.svg" alt="Inleveren" style="width:150px;height:80px"/>
+      <p>Inleveren / Doneren</p>
+    </div>
 
-      <div class="node" style="--x: -18; --y: 40">
-        <img src="assets/icons/Line1.svg" alt="Lijn" />
-      </div>
-      <div class="node" style="--x: -18; --y: 85">
-        <img src="assets/icons/Line2.svg" alt="Lijn" />
-      </div>
-      <div class="node" style="--x: -10; --y: 60">
-        <img src="assets/icons/Line3.svg" alt="Lijn" />
-      </div>
-      <div class="node" style="--x: 14; --y: 63">
-        <img src="assets/icons/Line4.svg" alt="Lijn" />
-      </div>
-      <div class="node" style="--x: 35; --y: 20">
-        <img src="assets/icons/Line5.svg" alt="Lijn" />
-      </div>
-      <div class="node" style="--x: 20; --y: 43">
-        <img src="assets/icons/Line6.svg" alt="Lijn" />
-      </div>
-      <div class="node" style="--x: 57; --y: 43">
-        <img src="assets/icons/Line7.svg" alt="Lijn" />
-      </div>
-      <div class="node" style="--x: -4; --y: 60">
-        <img
-          src="assets/icons/Line3.svg"
-          alt="Lijn tussen Consumeren en Opbergen"
-        />
-      </div>
+    <!-- bestaande statische lijn-afbeeldingen (mogen zichtbaar blijven) -->
 
-      <div class="node" style="--x: -1; --y: 102">
-        <img src="assets/icons/click.svg" alt="Klik" />
-      </div>
 
-      <div class="label-container" style="--x: -18; --y: 48">
-        <p class="label label-green">Route</p>
-        <span class="arrow-green">➜</span>
-      </div>
+    <!-- labels -->
+    <div class="label-container" style="--x: -26; --y: 40">
+      <p class="label label-green">Route</p><span class="arrow-green">↓</span>
+    </div>
+    <div class="label-container" style="--x: -25; --y: 103">
+      <p class="label label-green">Wat wordt er het meest opgeborgen?</p><span class="arrow-green">➜</span>
+    </div>
+    <div class="label-container" style="--x: 52; --y: 105">
+      <p class="label label-green">Hoeveel wordt er in verhouding weggegooid?</p><span class="arrow-green">➜</span>
+    </div>
 
-      <div class="label-container" style="--x: -25; --y: 103">
-        <p class="label label-green">Wat wordt er het meest opgeborgen?</p>
-        <span class="arrow-green">➜</span>
-      </div>
+    <!-- overlays -->
+    <div id="fridge-overlay"></div>
+    <div id="trash-overlay"></div>
 
-      <div class="label-container" style="--x: 52; --y: 105">
-        <p class="label label-green">
-          Hoeveel wordt er in verhouding weggegooid?
-        </p>
-        <span class="arrow-green">➜</span>
-      </div>
+    <!-- overlay-SVG voor dynamische lijnen -->
+    <svg id="routes" viewBox="0 0 1200 600" class="routes" aria-hidden="true">
+      <g id="flows"></g>
+    </svg>
+  </main>
 
-      <div id="fridge-overlay"></div>
-      <div id="trash-overlay"></div>
-    </main>
-
-    <script src="https://d3js.org/d3.v7.min.js"></script>
-    <script src="js/script.js"></script>
-  </body>
+  <script src="js/script.js"></script>
+</body>
 </html>

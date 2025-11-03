@@ -1,5 +1,5 @@
-﻿Type verpakking,Unieke verpakkingen,Weggegooid,Ingeleverd,Opgeborgen,%Weggegooid,%Ingeleverd,%Opgeborgen
-Klein flesje,28,8,12,12,28.60%,42.90%,30.80%
-Blikjes,27,15,10,10,55.60%,37%,25.60%
-Grote flessen,12,3,5,14,25%,41.70%,35.90%
-Glas,7,3,2,3,42.90%,28.60%,7.70%
+﻿Type verpakking,Unieke verpakkingen,Weggegooid,Ingeleverd,Opgeborgen,%Weggegooid,%Ingeleverd,%Opgeborgen,%UitKoelkast,%TerugKoelkast
+Klein flesje,28,8,12,12,28.60%,42.90%,30.80%,25%,20%
+Blikjes,27,15,10,10,55.60%,37%,25.60%,4%,3%
+Grote flessen,12,3,5,14,25%,41.70%,35.90%,70%,65%
+Glas,7,3,2,3,42.90%,28.60%,7.70%,10%,5%
