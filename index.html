@@ -6,11 +6,27 @@
     <title>Statiegeld in beeld</title>
     <link rel="stylesheet" href="css/style.css" />
   </head>
-  <header>
-    <h1>Statiegeld in beeld</h1>
-  </header>
-  <div class="header-line"></div>
+
   <body>
+    <header>
+      <div class="header-content">
+        <img
+          src="assets/icons/recycle.svg"
+          alt="Recycle"
+          class="recycle-icon left"
+        />
+        <div class="header-text">
+          <h1>Statiegeld in beeld</h1>
+          <h2>De route naar recycling</h2>
+        </div>
+        <img
+          src="assets/icons/recycle.svg"
+          alt="Recycle"
+          class="recycle-icon right"
+        />
+      </div>
+    </header>
+
     <main class="visual">
       <div class="step kopen" style="--x: -27; --y: 60">
         <img src="assets/icons/kopen.svg" alt="Kopen" />
@@ -53,35 +69,56 @@
       </div>
 
       <div class="node" style="--x: -18; --y: 40">
-        <img src="assets/icons/Line1.svg" alt="Line1" />
+        <img src="assets/icons/Line1.svg" alt="Lijn" />
       </div>
       <div class="node" style="--x: -18; --y: 85">
-        <img src="assets/icons/Line2.svg" alt="Line2" />
+        <img src="assets/icons/Line2.svg" alt="Lijn" />
       </div>
-      <div class="node" style="--x: -7; --y: 60">
-        <img src="assets/icons/Line3.svg" alt="Line3" />
+      <div class="node" style="--x: -10; --y: 60">
+        <img src="assets/icons/Line3.svg" alt="Lijn" />
       </div>
       <div class="node" style="--x: 14; --y: 63">
-        <img src="assets/icons/Line4.svg" alt="Line4" />
+        <img src="assets/icons/Line4.svg" alt="Lijn" />
       </div>
       <div class="node" style="--x: 35; --y: 20">
-        <img src="assets/icons/Line5.svg" alt="Line5" />
+        <img src="assets/icons/Line5.svg" alt="Lijn" />
       </div>
       <div class="node" style="--x: 20; --y: 43">
-        <img src="assets/icons/Line6.svg" alt="Line6" />
+        <img src="assets/icons/Line6.svg" alt="Lijn" />
       </div>
       <div class="node" style="--x: 57; --y: 43">
-        <img src="assets/icons/Line7.svg" alt="Line7" />
+        <img src="assets/icons/Line7.svg" alt="Lijn" />
       </div>
-            <div class="node" style="--x: 75; --y: 95">
-        <img src="assets/icons/weggooienverhouding.svg" alt="weggooienverhouding" />
+      <div class="node" style="--x: -4; --y: 60">
+        <img
+          src="assets/icons/Line3.svg"
+          alt="Lijn tussen Consumeren en Opbergen"
+        />
       </div>
-            </div>
-            <div class="node" style="--x: -1; --y: 102">
-        <img src="assets/icons/click.svg" alt="weggooienverhouding" />
+
+      <div class="node" style="--x: -1; --y: 102">
+        <img src="assets/icons/click.svg" alt="Klik" />
+      </div>
+
+      <div class="label-container" style="--x: -18; --y: 48">
+        <p class="label label-green">Route</p>
+        <span class="arrow-green">➜</span>
+      </div>
+
+      <div class="label-container" style="--x: -25; --y: 103">
+        <p class="label label-green">Wat wordt er het meest opgeborgen?</p>
+        <span class="arrow-green">➜</span>
+      </div>
+
+      <div class="label-container" style="--x: 52; --y: 105">
+        <p class="label label-green">
+          Hoeveel wordt er in verhouding weggegooid?
+        </p>
+        <span class="arrow-green">➜</span>
       </div>
 
       <div id="fridge-overlay"></div>
+      <div id="trash-overlay"></div>
     </main>
 
     <script src="https://d3js.org/d3.v7.min.js"></script>
