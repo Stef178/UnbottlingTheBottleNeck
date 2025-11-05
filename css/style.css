@@ -1,123 +1,321 @@
-:root { --w:1200; --h:600; }
+:root {
+  --w: 1200;
+  --h: 600;
+}
 
 body {
-  background:#eaf6e4;
-  font-family:Poppins, system-ui, sans-serif;
-  margin:0;
-  text-align:center;
-  overflow:hidden;
+  background: #eaf6e4;
+  font-family: Poppins, system-ui, sans-serif;
+  margin: 0;
+  text-align: center;
+  overflow: hidden;
 }
 
 /* header */
-header { background:#b5f2a3; padding:14px 0 6px; box-shadow:0 2px 4px rgba(0,0,0,.1); }
-.header-content { display:flex; justify-content:center; align-items:center; gap:30px; }
-.recycle-icon { width:40px; height:40px; }
-.header-text h1 { font-size:2rem; margin:0; color:#2b4a1e; }
-.header-text h2 { font-size:1.2rem; margin:4px 0 0; color:#355b25; font-weight:400; }
+header {
+  background: #b5f2a3;
+  padding: 14px 0 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.header-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 30px;
+}
+.recycle-icon {
+  width: 40px;
+  height: 40px;
+}
+.header-text h1 {
+  font-size: 2rem;
+  margin: 0;
+  color: #2b4a1e;
+}
+.header-text h2 {
+  font-size: 1.2rem;
+  margin: 4px 0 0;
+  color: #355b25;
+  font-weight: 400;
+}
 
 /* canvas */
 .visual {
-  position:relative;
-  width:min(1200px, 95vw);
-  aspect-ratio:1200/600;
-  margin:24px auto;
+  position: relative;
+  width: min(1200px, 95vw);
+  aspect-ratio: 1200/600;
+  margin: 24px auto;
 }
 
 /* stappen */
 .step {
-  position:absolute;
-  left:calc((var(--x) + 20) * 1%);
-  top:calc(var(--y) * 1%);
-  transform:translate(-50%, -50%);
-  text-align:center;
-  cursor:pointer;
+  position: absolute;
+  left: calc((var(--x) + 20) * 1%);
+  top: calc(var(--y) * 1%);
+  transform: translate(-50%, -50%);
+  text-align: center;
+  cursor: pointer;
 }
-.step img { width:80px; transition:transform .2s; }
-.step:hover img { transform:scale(1.08); }
+.step img {
+  width: 80px;
+  transition: transform 0.2s;
+}
+.step:hover img {
+  transform: scale(1.08);
+}
 .step p {
-  background:#aef59d;
-  padding:4px 10px;
-  border-radius:6px;
-  margin-top:.4rem;
-  display:inline-block;
+  background: #aef59d;
+  padding: 4px 10px;
+  border-radius: 6px;
+  margin-top: 0.4rem;
+  display: inline-block;
 }
 
 /* optioneel: label Consumeren rechts-boven */
-.step.consumeren { position:absolute; }
-.step.consumeren p{
-  position:absolute; top:-30px; right:-24px; margin:0; text-align:right;
+.step.consumeren {
+  position: absolute;
+}
+.step.consumeren p {
+  position: absolute;
+  top: -30px;
+  right: -24px;
+  margin: 0;
+  text-align: right;
 }
 
 /* statische lijn-afbeeldingen + labels */
 .node {
-  position:absolute;
-  left:calc((var(--x) + 20) * 1%);
-  top:calc(var(--y) * 1%);
-  transform:translate(-50%, -50%);
+  position: absolute;
+  left: calc((var(--x) + 20) * 1%);
+  top: calc(var(--y) * 1%);
+  transform: translate(-50%, -50%);
 }
-.label-container{
-  position:absolute;
-  left:calc((var(--x) + 20) * 1%);
-  top:calc(var(--y) * 1%);
-  transform:translate(-50%,-50%);
-  display:flex; align-items:center; gap:6px;
+.label-container {
+  position: absolute;
+  left: calc((var(--x) + 20) * 1%);
+  top: calc(var(--y) * 1%);
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
-.label{ font-size:.9rem; margin:0; }
-.label-green{ color:#2e5b1d; font-weight:700; }
-.arrow-green{ color:#2e5b1d; font-weight:700; font-size:1.1rem; }
+.label {
+  font-size: 0.9rem;
+  margin: 0;
+}
+.label-green {
+  color: #2e5b1d;
+  font-weight: 700;
+}
+.arrow-green {
+  color: #2e5b1d;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
 
 /* overlay-SVG voor programmeerbare paden */
-.routes{
-  position:absolute; inset:0; width:100%; height:100%;
-  pointer-events:none; z-index:2;
+.routes {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2;
 }
 
 /* koelkast overlay (werkend) */
-#fridge-image { width:85px; height:auto; transition:transform .4s ease; z-index:5; position:relative; }
+#fridge-image {
+  width: 85px;
+  height: auto;
+  transition: transform 0.4s ease;
+  z-index: 5;
+  position: relative;
+}
 #fridge-overlay {
-  position:fixed; inset:0; background:rgba(0,0,0,.4);
-  display:none; align-items:center; justify-content:center; z-index:999;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
 }
-#fridge-overlay.active { display:flex; }
-#fridge-overlay #open-fridge { width:520px; height:auto; position:relative; z-index:1000; }
+#fridge-overlay.active {
+  display: flex;
+}
+#fridge-overlay #open-fridge {
+  width: 520px;
+  height: auto;
+  position: relative;
+  z-index: 1000;
+}
 .fridge-shelves {
-  position:absolute; top:58%; left:45%; width:260px; height:500px;
-  transform:translate(-50%, -50%); display:flex; flex-direction:column;
-  justify-content:space-evenly; z-index:1001; pointer-events:none;
+  position: absolute;
+  top: 58%;
+  left: 45%;
+  width: 260px;
+  height: 500px;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  z-index: 1001;
+  pointer-events: none;
 }
-.shelf { display:flex; justify-content:center; align-items:flex-end; gap:8px; height:70px; flex-wrap:wrap; }
-#shelf-top .item{ width:28px; height:80px;  margin-top: 35px; }
-#shelf-middle-top .item{ width:22px; height:80px;  margin-top:-10px; }
-#shelf-middle-bottom .item{ width:30px; height:170px; margin-top:-200px; }
-#shelf-bottom .item{ width:38px; height:270px; margin-top:-300px; }
-.item{ opacity:0; transform:translateY(10px); transition:opacity .4s, transform .4s; }
-.item.visible{ opacity:1; transform:translateY(0); }
+.shelf {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 8px;
+  height: 70px;
+  flex-wrap: wrap;
+}
+#shelf-top .item {
+  width: 28px;
+  height: 80px;
+  margin-top: 35px;
+}
+#shelf-middle-top .item {
+  width: 22px;
+  height: 80px;
+  margin-top: -10px;
+}
+#shelf-middle-bottom .item {
+  width: 30px;
+  height: 170px;
+  margin-top: -200px;
+}
+#shelf-bottom .item {
+  width: 38px;
+  height: 270px;
+  margin-top: -300px;
+}
+.item {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.4s, transform 0.4s;
+}
+.item.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
 
 /* trash overlay (teamgenoot) */
 #trash-overlay {
-  position:fixed; inset:0; background:rgba(0,0,0,.4);
-  display:none; align-items:center; justify-content:center; z-index:999;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
 }
-#trash-overlay.active { display:flex; }
-#trash-overlay #open-trash { width:580px; height:auto; position:relative; z-index:1000; top:275px; }
-.trash-stacks { position:absolute; bottom:23%; left:50%; transform:translateX(-50%);
-  display:flex; gap:25px; align-items:flex-end; z-index:1001; text-align:center; }
-.trash-column{ display:flex; flex-direction:column; align-items:center; }
-.trash-column img{ width:45px; margin-bottom:2px; opacity:0; transform:translateY(20px);
-  transition:opacity .4s ease, transform .4s ease; }
-.trash-column img.visible{ opacity:1; transform:translateY(0); }
-.trash-label{ color:#aef59d; background:#2e5b1d; border-radius:6px; padding:3px 8px; font-weight:700; font-size:1rem; margin-bottom:4px; }
-.trash-money{ background:#2e5b1d; color:#aef59d; border-radius:6px; padding:3px 8px; margin-top:6px; font-weight:700; }
+#trash-overlay.active {
+  display: flex;
+}
+#trash-overlay #open-trash {
+  width: 580px;
+  height: auto;
+  position: relative;
+  z-index: 1000;
+  top: 275px;
+}
+.trash-stacks {
+  position: absolute;
+  bottom: 23%;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 25px;
+  align-items: flex-end;
+  z-index: 1001;
+  text-align: center;
+}
+.trash-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.trash-column img {
+  width: 45px;
+  margin-bottom: 2px;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+.trash-column img.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.trash-label {
+  color: #aef59d;
+  background: #2e5b1d;
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-weight: 700;
+  font-size: 1rem;
+  margin-bottom: 4px;
+}
+.trash-money {
+  background: #2e5b1d;
+  color: #aef59d;
+  border-radius: 6px;
+  padding: 3px 8px;
+  margin-top: 6px;
+  font-weight: 700;
+}
+
+.weggooienverhouding-icon {
+  position: absolute;
+  left: calc((var(--x) + 20) * 1%);
+  top: calc(var(--y) * 1%);
+  transform: translate(-50%, -50%);
+}
+
+.weggooienverhouding-icon img {
+  width: 300px; /* pas aan zo groot als je wil */
+  height: auto;
+}
 
 /* Label "Kopen" links van het icoon, verticaal gecentreerd */
-.step.kopen { position:absolute; }              /* is al zo, maar expliciet kan geen kwaad */
-.step.kopen p{
-  position:absolute;
-  right:100%;            /* zet het label direct links van het icoon */
-  top:50%;
-  transform:translateY(-50%);
-  margin:0;              /* override van jouw margin-top */
-  white-space:nowrap;    /* geen afbreken */
+.step.kopen {
+  position: absolute;
+} /* is al zo, maar expliciet kan geen kwaad */
+.step.kopen p {
+  position: absolute;
+  right: 100%; /* zet het label direct links van het icoon */
+  top: 50%;
+  transform: translateY(-50%);
+  margin: 0; /* override van jouw margin-top */
+  white-space: nowrap; /* geen afbreken */
   /* optioneel: afstandje */
-  margin-right:8px;
+  margin-right: 8px;
+}
+
+.click-icon-step {
+  position: absolute;
+  left: calc((var(--x) + 20) * 1%);
+  top: calc(var(--y) * 1%);
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  z-index: 10; /* boven de andere elementen */
+}
+
+.click-icon-step img {
+  width: 50px; /* pas aan naar wens */
+  height: 60px;
+  transition: transform 0.2s;
+}
+
+.click-icon-step img:hover {
+  transform: scale(1.2);
+}
+
+.routepijl-step {
+  position: absolute;
+  left: calc((var(--x) + 20) * 1%);
+  top: calc(var(--y) * 1%);
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  z-index: 10;
 }
