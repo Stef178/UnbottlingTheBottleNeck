@@ -1,4 +1,64 @@
-/* ------------------ koelkast interactie ------------------ */
+/* ------------------ helpers & globals ------------------ */
+const flows = d3.select("#flows");
+const W = 1200, H = 600;
+
+function centerInViewBox(sel){
+  const el  = document.querySelector(sel);
+  const box = document.querySelector('.visual').getBoundingClientRect();
+  const r   = el.getBoundingClientRect();
+  return {
+    x: ((r.left - box.left) + r.width/2) / box.width  * W,
+    y: ((r.top  - box.top ) + r.height/2)             / box.height * H
+  };
+}
+function pFloat(s){ return parseFloat(String(s).replace('%','').replace(',','.')); }
+
+/* ==== CSV cache + tooltip helpers ==== */
+let CSV_ROWS = [];
+const KEY2LABEL = {
+  grote: "Grote flessen",
+  kleine: "Klein flesje",
+  blik: "Blikjes",
+  glas: "Glas"
+};
+function pctFor(typeLabel, col, fallbackCol){
+  const r = CSV_ROWS.find(x => x["Type verpakking"] === typeLabel);
+  if(!r) return 0;
+  const raw = (r[col] && String(r[col]).trim() !== "")
+    ? r[col]
+    : (fallbackCol ? r[fallbackCol] : 0);
+  return parseFloat(String(raw).replace("%","").replace(",", ".")) || 0;
+}
+
+const tooltip = d3.select("#tooltip");
+function showTip(text, x, y){
+  tooltip.text(text)
+    .style("opacity", 1)
+    .style("transform", `translate(${x + 12}px, ${y + 12}px)`)
+    .attr("aria-hidden", "false");
+}
+function hideTip(){
+  tooltip.style("opacity", 0)
+    .attr("aria-hidden", "true")
+    .style("transform", "translate(-9999px, -9999px)");
+}
+function wireHover(sel){
+  sel
+    .classed("flow-band", true)
+    .on("mouseenter", function(event){
+      const el = d3.select(this);
+      const label = el.attr("data-label");
+      const metric = el.attr("data-metric");
+      const val = parseFloat(el.attr("data-pct")) || 0;
+      showTip(`${label}: ${val.toFixed(1)}% (${metric.replace('%','')})`, event.clientX, event.clientY);
+    })
+    .on("mousemove", function(event){
+      showTip(tooltip.text(), event.clientX, event.clientY);
+    })
+    .on("mouseleave", hideTip);
+}
+
+/* ------------------ koelkast & trash overlays ------------------ */
 document.addEventListener("DOMContentLoaded", () => {
   const fridge = d3.select("#fridge-image");
   const overlay = d3.select("#fridge-overlay");
@@ -19,8 +79,8 @@ document.addEventListener("DOMContentLoaded", () => {
         </div>
       `);
       try {
-        const data = await d3.csv("data.csv");
-        fillFridge(data);
+        if (!CSV_ROWS.length) CSV_ROWS = await d3.csv("data.csv");
+        fillFridge(CSV_ROWS);
       } catch (err) {
         console.error("Fout bij laden CSV:", err);
       }
@@ -32,7 +92,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!clickedInside) overlay.classed("active", false).html("");
   });
 
-  // trash overlay (teamgenoot)
+  // trash overlay
   trashBtn.on("click", async () => {
     const isActive = trashOverlay.classed("active");
     if (!isActive) {
@@ -46,8 +106,8 @@ document.addEventListener("DOMContentLoaded", () => {
         </div>
       `);
       try {
-        const data = await d3.csv("data.csv");
-        fillTrash(data);
+        if (!CSV_ROWS.length) CSV_ROWS = await d3.csv("data.csv");
+        fillTrash(CSV_ROWS);
       } catch (err) {
         console.error("Fout bij laden CSV:", err);
       }
@@ -70,8 +130,8 @@ function fillFridge(data) {
 
   const typeMap = {
     "Klein flesje": { file: "kleinflesje", shelf: "top" },
-    Glas:           { file: "glas",         shelf: "middleTop" },
-    Blikjes:        { file: "blikje",       shelf: "middleBottom" },
+    "Glas":         { file: "glas",         shelf: "middleTop" },
+    "Blikjes":      { file: "blikje",       shelf: "middleBottom" },
     "Grote flessen":{ file: "grotefles",    shelf: "bottom" },
   };
 
@@ -104,8 +164,8 @@ function fillTrash(data) {
   const typeMap = {
     "Grote flessen": { file: "grotefles",   statiegeld: "€0,25" },
     "Klein flesje":  { file: "kleinflesje", statiegeld: "€0,15" },
-    Blikjes:         { file: "blikje",      statiegeld: "€0,15" },
-    Glas:            { file: "glas",        statiegeld: "€0,10" },
+    "Blikjes":       { file: "blikje",      statiegeld: "€0,15" },
+    "Glas":          { file: "glas",        statiegeld: "€0,10" },
   };
 
   data.forEach((row) => {
@@ -130,21 +190,8 @@ function fillTrash(data) {
 }
 
 /* ------------------ dynamische lijnen (vier banden) ------------------ */
-const flows = d3.select("#flows");
-const W = 1200, H = 600;
 
-function centerInViewBox(sel){
-  const el  = document.querySelector(sel);
-  const box = document.querySelector('.visual').getBoundingClientRect();
-  const r   = el.getBoundingClientRect();
-  return {
-    x: ((r.left - box.left) + r.width/2) / box.width  * W,
-    y: ((r.top  - box.top ) + r.height/2)             / box.height * H
-  };
-}
-function pFloat(s){ return parseFloat(String(s).replace('%','').replace(',','.')); }
-
-/* A) Consumeren → Inleveren (dikte op basis van %Ingeleverd) */
+/* A) Consumeren → Inleveren (%Ingeleverd) */
 async function loadTopValues(){
   const rows = await d3.csv("data.csv");
   function val(type){
@@ -166,9 +213,9 @@ function drawTopBands(values){
   const p1 = centerInViewBox(".consumeren");
   const p2 = centerInViewBox(".inleveren");
 
-  const padStart = 60;   // links inkorten
-  const padEnd   = 120;  // rechts inkorten
-  const yOffset  = -10;  // iets omhoog
+  const padStart = 60;
+  const padEnd   = 120;
+  const yOffset  = -10;
 
   const xLeft  = Math.min(p1.x, p2.x) + padStart;
   const xRight = Math.max(p1.x, p2.x) - padEnd;
@@ -178,10 +225,10 @@ function drawTopBands(values){
   const w = d3.scaleLinear().domain([0, maxVal]).range([4, 26]);
 
   const bands = [
-    {key:"grote",  color:"#000000"},
-    {key:"kleine", color:"#1f6f32"},
-    {key:"blik",   color:"#FFD400"},
-    {key:"glas",   color:"#A9713A"}
+    {key:"grote",  color:"#000000", metric:"%Ingeleverd"},
+    {key:"kleine", color:"#1f6f32", metric:"%Ingeleverd"},
+    {key:"blik",   color:"#FFD400", metric:"%Ingeleverd"},
+    {key:"glas",   color:"#A9713A", metric:"%Ingeleverd"}
   ];
 
   const gaps = 2;
@@ -199,24 +246,47 @@ function drawTopBands(values){
   bands.forEach((b, i)=>{
     const h = heights[i];
     const yBand = yCursor + h/2;
-    flows.append("line")
+    const path = flows.append("line")
       .attr("x1", xLeft).attr("y1", yBand)
       .attr("x2", xRight).attr("y2", yBand)
       .attr("stroke", b.color)
       .attr("stroke-width", h)
-      .attr("stroke-linecap", "butt");
+      .attr("stroke-linecap", "butt")
+      .attr("data-label", KEY2LABEL[b.key])
+      .attr("data-metric", b.metric)
+      .attr("data-pct", pctFor(KEY2LABEL[b.key], b.metric));
+    wireHover(path);
+    path.classed("flow-band", true);
     yCursor += h + gaps;
   });
 }
 
-/* B) Kopen → Consumeren (dikte op basis van %Weggegooid) */
+/* helpers voor segmenten */
+function trimSegment(a, b, trimStartPx, trimEndPx){
+  const dx = b.x - a.x, dy = b.y - a.y;
+  const len = Math.hypot(dx, dy) || 1;
+  const ux = dx / len, uy = dy / len;
+  return {
+    a: { x: a.x + ux * trimStartPx, y: a.y + uy * trimStartPx },
+    b: { x: b.x - ux * trimEndPx,   y: b.y - uy * trimEndPx }
+  };
+}
+function pathWithOffset(a, b, offset){
+  const dx = b.x - a.x, dy = b.y - a.y;
+  const len = Math.hypot(dx, dy) || 1;
+  const nx = -dy / len, ny = dx / len;
+  const sx = nx * offset, sy = ny * offset;
+  return `M${a.x + sx},${a.y + sy} L${b.x + sx},${b.y + sy}`;
+}
+
+/* B) Kopen → Consumeren (%Weggegooid) */
 async function loadBuyValues(){
   const rows = await d3.csv("data.csv");
   function val(type){
     const row = rows.find(r => r["Type verpakking"] === type);
     if(!row) return 0;
     const n  = +row["Unieke verpakkingen"] || 0;
-    const pi = (pFloat(row["%Weggegooid"]) || 0) / 100; // OF gebruik %Opgeborgen / %Ingeleverd
+    const pi = (pFloat(row["%Weggegooid"]) || 0) / 100;
     return n * pi;
   }
   return {
@@ -231,51 +301,23 @@ function drawBuyLine(values){
   const p1 = centerInViewBox(".kopen");
   const p2 = centerInViewBox(".consumeren");
 
-  // lichte positionering (pas aan naar smaak)
-  p1.x += 0;
-  p1.y += 0;
-  p2.x -= 0;
-  p2.y += 0;
-
-  // hoeveel wil je aan de Consumeren-kant inkorten (px)?
-  const TRIM_END = 50; // verhoog/ verlaag tot hij niet meer over het icoon gaat
-
-  // helpers: trim langs de lijn + pad met loodrechte offset (caps blijven gelijk)
-  function trimSegment(a, b, trimStartPx, trimEndPx){
-    const dx = b.x - a.x, dy = b.y - a.y;
-    const len = Math.hypot(dx, dy) || 1;
-    const ux = dx / len, uy = dy / len;
-    return {
-      a: { x: a.x + ux * trimStartPx, y: a.y + uy * trimStartPx },
-      b: { x: b.x - ux * trimEndPx,   y: b.y - uy * trimEndPx }
-    };
-  }
-  function pathWithOffset(a, b, offset){
-    const dx = b.x - a.x, dy = b.y - a.y;
-    const len = Math.hypot(dx, dy) || 1;
-    const nx = -dy / len, ny = dx / len; // normale
-    const sx = nx * offset, sy = ny * offset;
-    return `M${a.x + sx},${a.y + sy} L${b.x + sx},${b.y + sy}`;
-  }
-
-  // trim alleen aan het einde (consumeren)
+  const TRIM_END = 50;
   const { a, b } = trimSegment(p1, p2, 0, TRIM_END);
 
   const maxVal = Math.max(values.grote, values.kleine, values.blik, values.glas, 1);
   const w = d3.scaleLinear().domain([0, maxVal]).range([4, 26]);
 
   const bands = [
-    {key:"grote",  color:"#000000"},
-    {key:"kleine", color:"#1f6f32"},
-    {key:"blik",   color:"#FFD400"},
-    {key:"glas",   color:"#A9713A"}
+    {key:"grote",  color:"#000000", metric:"%Weggegooid"},
+    {key:"kleine", color:"#1f6f32", metric:"%Weggegooid"},
+    {key:"blik",   color:"#FFD400", metric:"%Weggegooid"},
+    {key:"glas",   color:"#A9713A", metric:"%Weggegooid"}
   ];
 
   const gaps = 2;
   const heights = bands.map(bd => w(values[bd.key]));
   const totalH = heights.reduce((x,y)=>x+y,0) + gaps*(bands.length-1);
 
-  // schaduw/middenlijn
   flows.append("path")
     .attr("d", pathWithOffset(a, b, 0))
     .attr("fill", "none")
@@ -284,24 +326,25 @@ function drawBuyLine(values){
     .attr("opacity", 0.25)
     .attr("stroke-linecap", "round");
 
-  // stroken netjes parallel, zelfde eindpunt
   let cursor = -totalH/2;
   bands.forEach((bd, i) => {
     const h = heights[i];
     const offset = cursor + h/2;
-    flows.append("path")
+    const path = flows.append("path")
       .attr("d", pathWithOffset(a, b, offset))
       .attr("fill", "none")
       .attr("stroke", bd.color)
       .attr("stroke-width", h)
-      .attr("stroke-linecap", "butt");
+      .attr("stroke-linecap", "butt")
+      .attr("data-label", KEY2LABEL[bd.key])
+      .attr("data-metric", bd.metric)
+      .attr("data-pct", pctFor(KEY2LABEL[bd.key], bd.metric));
+    wireHover(path);
     cursor += h + gaps;
   });
 }
 
-
-
-/* C) Kopen → Opbergen (dikte op basis van %Opgeborgen) */
+/* C) Kopen → Opbergen (%Opgeborgen) */
 async function loadStoreValues(){
   const rows = await d3.csv("data.csv");
   function val(type){
@@ -323,52 +366,25 @@ function drawStoreLine(values){
   const p1 = centerInViewBox(".kopen");
   const p2 = centerInViewBox(".opbergen");
 
-  // lichte positionering (pas aan naar smaak)
-  p1.x += 0;
-  p1.y += 50;
-  p2.x -= 0;
-  p2.y -= 0;
+  const TRIM_START = 0;
+  const TRIM_END   = 110;
 
-  // hoeveel inkorten? (zelfde aanpak als bij drawBuyLine)
-  const TRIM_START = 0; // korter aan de Kopen-kant
-  const TRIM_END   = 110; // korter aan de Opbergen-kant
-
-  // helpers: trim langs de lijn + pad met loodrechte offset
-  function trimSegment(a, b, trimStartPx, trimEndPx){
-    const dx = b.x - a.x, dy = b.y - a.y;
-    const len = Math.hypot(dx, dy) || 1;
-    const ux = dx / len, uy = dy / len;
-    return {
-      a: { x: a.x + ux * trimStartPx, y: a.y + uy * trimStartPx },
-      b: { x: b.x - ux * trimEndPx,   y: b.y - uy * trimEndPx }
-    };
-  }
-  function pathWithOffset(a, b, offset){
-    const dx = b.x - a.x, dy = b.y - a.y;
-    const len = Math.hypot(dx, dy) || 1;
-    const nx = -dy / len, ny = dx / len; // eenheidsnormaal
-    const sx = nx * offset, sy = ny * offset;
-    return `M${a.x + sx},${a.y + sy} L${b.x + sx},${b.y + sy}`;
-  }
-
-  // trimmen
   const { a, b } = trimSegment(p1, p2, TRIM_START, TRIM_END);
 
   const maxVal = Math.max(values.grote, values.kleine, values.blik, values.glas, 1);
   const w = d3.scaleLinear().domain([0, maxVal]).range([4, 26]);
 
   const bands = [
-    {key:"grote",  color:"#000000"},
-    {key:"kleine", color:"#1f6f32"},
-    {key:"blik",   color:"#FFD400"},
-    {key:"glas",   color:"#A9713A"}
+    {key:"grote",  color:"#000000", metric:"%Opgeborgen"},
+    {key:"kleine", color:"#1f6f32", metric:"%Opgeborgen"},
+    {key:"blik",   color:"#FFD400", metric:"%Opgeborgen"},
+    {key:"glas",   color:"#A9713A", metric:"%Opgeborgen"}
   ];
 
   const gaps = 2;
   const heights = bands.map(bd => w(values[bd.key]));
   const totalH = heights.reduce((x,y)=>x+y,0) + gaps*(bands.length-1);
 
-  // ruggengraat/middenlijn
   flows.append("path")
     .attr("d", pathWithOffset(a, b, 0))
     .attr("fill", "none")
@@ -377,68 +393,35 @@ function drawStoreLine(values){
     .attr("opacity", 0.25)
     .attr("stroke-linecap", "round");
 
-  // vier banden, eindigen exact gelijk
   let cursor = -totalH/2;
   bands.forEach((bd, i) => {
     const h = heights[i];
     const offset = cursor + h/2;
-    flows.append("path")
+    const path = flows.append("path")
       .attr("d", pathWithOffset(a, b, offset))
       .attr("fill", "none")
       .attr("stroke", bd.color)
       .attr("stroke-width", h)
-      .attr("stroke-linecap", "butt");
+      .attr("stroke-linecap", "butt")
+      .attr("data-label", KEY2LABEL[bd.key])
+      .attr("data-metric", bd.metric)
+      .attr("data-pct", pctFor(KEY2LABEL[bd.key], bd.metric));
+    wireHover(path);
     cursor += h + gaps;
   });
 }
 
+/* ======= Opbergen ↔ Consumeren (bidirectioneel) ======= */
+function segTrim(a, b, trimStartPx, trimEndPx){ return trimSegment(a,b,trimStartPx,trimEndPx); }
+function offsetPath(a, b, offset){ return pathWithOffset(a,b,offset); }
 
-/* init: teken alle lijnen (één keer flows leegmaken) */
-async function initTop(){
-  flows.selectAll("*").remove();
-
-  const topValues = await loadTopValues();
-  drawTopBands(topValues);
-
-  const buyValues = await loadBuyValues();
-  drawBuyLine(buyValues);
-
-  const storeValues = await loadStoreValues();   // nieuw
-  drawStoreLine(storeValues);                    // nieuw
-}
-
-
-window.addEventListener("load",  initTop);
-window.addEventListener("resize", initTop);
-
-/* ===================== TOEGEVOEGD: Opbergen ↔ Consumeren bidirectioneel ===================== */
-
-/* Helpers (globaal, unieke namen om niets te overschrijven) */
-function segTrim(a, b, trimStartPx, trimEndPx){
-  const dx = b.x - a.x, dy = b.y - a.y;
-  const len = Math.hypot(dx, dy) || 1;
-  const ux = dx / len, uy = dy / len;
-  return {
-    a: { x: a.x + ux * trimStartPx, y: a.y + uy * trimStartPx },
-    b: { x: b.x - ux * trimEndPx,   y: b.y - uy * trimEndPx }
-  };
-}
-function offsetPath(a, b, offset){
-  const dx = b.x - a.x, dy = b.y - a.y;
-  const len = Math.hypot(dx, dy) || 1;
-  const nx = -dy / len, ny = dx / len; // eenheidsnormaal
-  const sx = nx * offset, sy = ny * offset;
-  return `M${a.x + sx},${a.y + sy} L${b.x + sx},${b.y + sy}`;
-}
-
-/* Data-loaders voor de nieuwe richtingen */
 async function loadFridgeToConsumeValues(){
   const rows = await d3.csv("data.csv");
   function val(type){
     const r = rows.find(x => x["Type verpakking"] === type);
     if(!r) return 0;
     const n = +r["Unieke verpakkingen"] || 0;
-    const p = (pFloat(r["%UitKoelkast"]) || 0) / 100; // nieuwe kolom
+    const p = (pFloat(r["%UitKoelkast"]) || 0) / 100;
     return n * p;
   }
   return { grote: val("Grote flessen"), kleine: val("Klein flesje"), blik: val("Blikjes"), glas: val("Glas") };
@@ -449,84 +432,75 @@ async function loadConsumeToFridgeValues(){
     const r = rows.find(x => x["Type verpakking"] === type);
     if(!r) return 0;
     const n = +r["Unieke verpakkingen"] || 0;
-    const p = (pFloat(r["%TerugKoelkast"]) || 0) / 100; // nieuwe kolom
+    const p = (pFloat(r["%TerugKoelkast"]) || 0) / 100;
     return n * p;
   }
   return { grote: val("Grote flessen"), kleine: val("Klein flesje"), blik: val("Blikjes"), glas: val("Glas") };
 }
-// === instellingen voor dikte/afstand (makkelijk bijstellen) ===
-const FLOW_MIN_W = 3;     // dunste band
-const FLOW_MAX_W = 18;    // dikste band  (was 26)
-const FLOW_GAP   = 1.5;   // ruimte tussen banden
-const LANE_SEP   = 55;    // afstand tussen heen- en terugbaan
+const FLOW_MIN_W = 3;
+const FLOW_MAX_W = 18;
+const FLOW_GAP   = 1.5;
+const LANE_SEP   = 55;
 
-/* Tekenen: Opbergen -> Consumeren (heen) */
 function drawFridgeToConsume(values){
   const pA = centerInViewBox(".opbergen");
   const pB = centerInViewBox(".consumeren");
 
-  // kleine visuele correcties
   pA.x += 40; pA.y -= 6;
-  pB.x += 40;  pB.y += 6;
+  pB.x += 40; pB.y += 6;
 
-  // korter maken: meer trimmen
-  const { a, b } = segTrim(pA, pB, 130, 130); // start 30px na opbergen, stop 80px vóór consumeren
+  const { a, b } = segTrim(pA, pB, 130, 130);
 
   const maxVal = Math.max(values.grote, values.kleine, values.blik, values.glas, 1);
   const scaleW = d3.scaleLinear().domain([0, maxVal]).range([FLOW_MIN_W, FLOW_MAX_W]);
 
   const bands = [
-    {key:"grote",  color:"#000000", w: scaleW(values.grote)},
-    {key:"kleine", color:"#1f6f32", w: scaleW(values.kleine)},
-    {key:"blik",   color:"#FFD400", w: scaleW(values.blik)},
-    {key:"glas",   color:"#A9713A", w: scaleW(values.glas)}
+    {key:"grote",  color:"#000000", w: scaleW(values.grote),  metric:"%UitKoelkast"},
+    {key:"kleine", color:"#1f6f32", w: scaleW(values.kleine), metric:"%UitKoelkast"},
+    {key:"blik",   color:"#FFD400", w: scaleW(values.blik),   metric:"%UitKoelkast"},
+    {key:"glas",   color:"#A9713A", w: scaleW(values.glas),   metric:"%UitKoelkast"}
   ];
 
   const totalH = bands.reduce((s,x)=>s+x.w,0) + FLOW_GAP*(bands.length-1);
 
-  // middenlijn schaduw (ook dunner)
   flows.append("path")
     .attr("d", offsetPath(a, b, 0))
     .attr("fill","none").attr("stroke","#111").attr("stroke-width",3)
     .attr("opacity",0.25).attr("stroke-linecap","round");
 
-  // banden
   let cursor = -totalH/2;
   bands.forEach(bd => {
     const off = cursor + bd.w/2;
-    flows.append("path")
+    const path = flows.append("path")
       .attr("d", offsetPath(a, b, off))
       .attr("fill","none").attr("stroke", bd.color).attr("stroke-width", bd.w)
-      .attr("stroke-linecap","butt");
+      .attr("stroke-linecap","butt")
+      .attr("data-label", KEY2LABEL[bd.key])
+      .attr("data-metric", bd.metric)
+      .attr("data-pct", pctFor(KEY2LABEL[bd.key], bd.metric));
+    wireHover(path);
     cursor += bd.w + FLOW_GAP;
   });
 }
 
-/* Tekenen: Consumeren -> Opbergen (terug), parallel langs de heenlijn */
 function drawConsumeToFridge(values){
   const pA = centerInViewBox(".consumeren");
   const pB = centerInViewBox(".opbergen");
 
-  // kleine correcties
-  pA.x -= -10;  pA.y += 10;
-  pB.x -= -10;  pB.y -= 10;
-
-  // korter maken aan beide kanten
-  const trimmed = segTrim(pA, pB, 125, 125);  // 60px na consumeren starten, 40px vóór opbergen stoppen
+  const trimmed = segTrim(pA, pB, 125, 125);
 
   const maxVal = Math.max(values.grote, values.kleine, values.blik, values.glas, 1);
   const scaleW = d3.scaleLinear().domain([0, maxVal]).range([FLOW_MIN_W, FLOW_MAX_W]);
 
   const bands = [
-    {key:"grote",  color:"#000000", w: scaleW(values.grote)},
-    {key:"kleine", color:"#1f6f32", w: scaleW(values.kleine)},
-    {key:"blik",   color:"#FFD400", w: scaleW(values.blik)},
-    {key:"glas",   color:"#A9713A", w: scaleW(values.glas)}
+    {key:"grote",  color:"#000000", w: scaleW(values.grote),  metric:"%TerugKoelkast"},
+    {key:"kleine", color:"#1f6f32", w: scaleW(values.kleine), metric:"%TerugKoelkast"},
+    {key:"blik",   color:"#FFD400", w: scaleW(values.blik),   metric:"%TerugKoelkast"},
+    {key:"glas",   color:"#A9713A", w: scaleW(values.glas),   metric:"%TerugKoelkast"}
   ];
 
   const totalH = bands.reduce((s,x)=>s+x.w,0) + FLOW_GAP*(bands.length-1);
 
-  // helper voor lane-offset
   function lanePath(a,b,laneOffset,bandOffset){
     const dx = b.x - a.x, dy = b.y - a.y;
     const len = Math.hypot(dx, dy) || 1;
@@ -535,26 +509,27 @@ function drawConsumeToFridge(values){
     return `M${a.x + sx},${a.y + sy} L${b.x + sx},${b.y + sy}`;
   }
 
-  // middenlijn schaduw (dunner)
   flows.append("path")
     .attr("d", lanePath(trimmed.a, trimmed.b, LANE_SEP, 0))
     .attr("fill","none").attr("stroke","#111").attr("stroke-width",3)
     .attr("opacity",0.25).attr("stroke-linecap","round");
 
-  // banden
   let cursor = -totalH/2;
   bands.forEach(bd => {
     const off = cursor + bd.w/2;
-    flows.append("path")
+    const path = flows.append("path")
       .attr("d", lanePath(trimmed.a, trimmed.b, LANE_SEP, off))
       .attr("fill","none").attr("stroke", bd.color).attr("stroke-width", bd.w)
-      .attr("stroke-linecap","butt");
+      .attr("stroke-linecap","butt")
+      .attr("data-label", KEY2LABEL[bd.key])
+      .attr("data-metric", bd.metric)
+      .attr("data-pct", pctFor(KEY2LABEL[bd.key], bd.metric));
+    wireHover(path);
     cursor += bd.w + FLOW_GAP;
   });
 }
-/* ===================== NIEUW: Consumeren → Weggooien ===================== */
 
-/* Data-loader: gebruik %Weggegooid */
+/* Consumeren → Weggooien (%Weggegooid) */
 async function loadConsumeToTrashValues(){
   const rows = await d3.csv("data.csv");
   function val(type){
@@ -564,129 +539,101 @@ async function loadConsumeToTrashValues(){
     const p = (pFloat(r["%Weggegooid"]) || 0) / 100;
     return n * p;
   }
-  return { 
-    grote:  val("Grote flessen"), 
-    kleine: val("Klein flesje"), 
-    blik:   val("Blikjes"), 
-    glas:   val("Glas") 
-  };
+  return { grote: val("Grote flessen"), kleine: val("Klein flesje"), blik: val("Blikjes"), glas: val("Glas") };
 }
-
-/* Tekenen: Consumeren → Weggooien */
 function drawConsumeToTrash(values){
   const pA = centerInViewBox(".consumeren");
   const pB = centerInViewBox(".weggooien");
 
-  // kleine positionering
-  pA.x += 15;   // iets naar rechts van het figuurtje
-  pA.y += 25;   // iets omlaag
-  pB.x -= 10;   // iets naar links van de prullenbak
-  pB.y -= 10;   // iets omhoog
+  pA.x += 15; pA.y += 25;
+  pB.x -= 10; pB.y -= 10;
 
-  // trim zodat de lijn niet in iconen boort
-  const TRIM_START = 50;  // vanaf consumeren
-  const TRIM_END   = 100;  // vóór de prullenbak
-  const { a, b } = segTrim(pA, pB, TRIM_START, TRIM_END);
+  const { a, b } = segTrim(pA, pB, 50, 100);
 
-  // schaal & kleuren
   const maxVal = Math.max(values.grote, values.kleine, values.blik, values.glas, 1);
   const scaleW = d3.scaleLinear().domain([0, maxVal]).range([4, 20]);
   const bands = [
-    {key:"grote",  color:"#000000", w: scaleW(values.grote)},
-    {key:"kleine", color:"#1f6f32", w: scaleW(values.kleine)},
-    {key:"blik",   color:"#FFD400", w: scaleW(values.blik)},
-    {key:"glas",   color:"#A9713A", w: scaleW(values.glas)}
+    {key:"grote",  color:"#000000", w: scaleW(values.grote),  metric:"%Weggegooid"},
+    {key:"kleine", color:"#1f6f32", w: scaleW(values.kleine), metric:"%Weggegooid"},
+    {key:"blik",   color:"#FFD400", w: scaleW(values.blik),   metric:"%Weggegooid"},
+    {key:"glas",   color:"#A9713A", w: scaleW(values.glas),   metric:"%Weggegooid"}
   ];
   const gaps = 2;
   const totalH = bands.reduce((s,x)=>s+x.w,0) + gaps*(bands.length-1);
 
-  // middenlijn schaduw
   flows.append("path")
     .attr("d", offsetPath(a, b, 0))
     .attr("fill","none").attr("stroke","#111").attr("stroke-width",3)
     .attr("opacity",0.25).attr("stroke-linecap","round");
 
-  // banden
   let cursor = -totalH/2;
   bands.forEach(bd => {
     const off = cursor + bd.w/2;
-    flows.append("path")
+    const path = flows.append("path")
       .attr("d", offsetPath(a, b, off))
       .attr("fill","none").attr("stroke", bd.color).attr("stroke-width", bd.w)
-      .attr("stroke-linecap","butt");
+      .attr("stroke-linecap","butt")
+      .attr("data-label", KEY2LABEL[bd.key])
+      .attr("data-metric", bd.metric)
+      .attr("data-pct", pctFor(KEY2LABEL[bd.key], bd.metric));
+    wireHover(path);
     cursor += bd.w + gaps;
   });
 }
 
-/* ===================== NIEUW: Verzamelen → Consumeren ===================== */
-
-/* Data-loader: gebruik %Ingeleverd (het deel dat weer terugkomt bij consument via recycling) */
+/* Verzamelen → Consumeren (%Ingeleverd) */
 async function loadCollectToConsumeValues(){
   const rows = await d3.csv("data.csv");
   function val(type){
     const r = rows.find(x => x["Type verpakking"] === type);
     if(!r) return 0;
     const n = +r["Unieke verpakkingen"] || 0;
-    const p = (pFloat(r["%Ingeleverd"]) || 0) / 100; // hergebruikt deel
+    const p = (pFloat(r["%Ingeleverd"]) || 0) / 100;
     return n * p;
   }
-  return { 
-    grote:  val("Grote flessen"), 
-    kleine: val("Klein flesje"), 
-    blik:   val("Blikjes"), 
-    glas:   val("Glas") 
-  };
+  return { grote: val("Grote flessen"), kleine: val("Klein flesje"), blik: val("Blikjes"), glas: val("Glas") };
 }
-
-/* Tekenen: Verzamelen → Consumeren */
 function drawCollectToConsume(values){
   const pA = centerInViewBox(".verzamelen");
   const pB = centerInViewBox(".consumeren");
 
-  // kleine positionering
-  pA.x += 10;   // iets naar rechts van de prullenbak
-  pA.y -= 30;   // iets omhoog
-  pB.x -= 20;   // iets naar links van de figuur
-  pB.y += 10;   // iets omlaag
+  pA.x += 10; pA.y -= 30;
+  pB.x -= 20; pB.y += 10;
 
-  // trim zodat de lijn niet door iconen loopt
-  const TRIM_START = 120;  // vanaf verzamelen
-  const TRIM_END   = 160;  // vóór consumeren stoppen (verhoog voor korter)
-  const { a, b } = segTrim(pA, pB, TRIM_START, TRIM_END);
+  const { a, b } = segTrim(pA, pB, 120, 160);
 
-  // schaal & kleuren
   const maxVal = Math.max(values.grote, values.kleine, values.blik, values.glas, 1);
   const scaleW = d3.scaleLinear().domain([0, maxVal]).range([4, 20]);
   const bands = [
-    {key:"grote",  color:"#000000", w: scaleW(values.grote)},
-    {key:"kleine", color:"#1f6f32", w: scaleW(values.kleine)},
-    {key:"blik",   color:"#FFD400", w: scaleW(values.blik)},
-    {key:"glas",   color:"#A9713A", w: scaleW(values.glas)}
+    {key:"grote",  color:"#000000", w: scaleW(values.grote),  metric:"%Ingeleverd"},
+    {key:"kleine", color:"#1f6f32", w: scaleW(values.kleine), metric:"%Ingeleverd"},
+    {key:"blik",   color:"#FFD400", w: scaleW(values.blik),   metric:"%Ingeleverd"},
+    {key:"glas",   color:"#A9713A", w: scaleW(values.glas),   metric:"%Ingeleverd"}
   ];
   const gaps = 2;
   const totalH = bands.reduce((s,x)=>s+x.w,0) + gaps*(bands.length-1);
 
-  // middenlijn schaduw
   flows.append("path")
     .attr("d", offsetPath(a, b, 0))
     .attr("fill","none").attr("stroke","#111").attr("stroke-width",3)
     .attr("opacity",0.25).attr("stroke-linecap","round");
 
-  // banden
   let cursor = -totalH/2;
   bands.forEach(bd => {
     const off = cursor + bd.w/2;
-    flows.append("path")
+    const path = flows.append("path")
       .attr("d", offsetPath(a, b, off))
       .attr("fill","none").attr("stroke", bd.color).attr("stroke-width", bd.w)
-      .attr("stroke-linecap","butt");
+      .attr("stroke-linecap","butt")
+      .attr("data-label", KEY2LABEL[bd.key])
+      .attr("data-metric", bd.metric)
+      .attr("data-pct", pctFor(KEY2LABEL[bd.key], bd.metric));
+    wireHover(path);
     cursor += bd.w + gaps;
   });
 }
 
-/* ===================== NIEUW: Verzamelen → Doneren (Inleveren) ===================== */
-
-/* Data-loader: gebruikt %Gedoneerd als aanwezig, anders %Ingeleverd */
+/* Verzamelen → Doneren (fallback %Ingeleverd) */
 async function loadCollectToDonateValues(){
   const rows = await d3.csv("data.csv");
   function val(type){
@@ -699,105 +646,76 @@ async function loadCollectToDonateValues(){
     const p = (parseFloat(String(perc).replace('%','').replace(',','.')) || 0) / 100;
     return n * p;
   }
-  return {
-    grote:  val("Grote flessen"),
-    kleine: val("Klein flesje"),
-    blik:   val("Blikjes"),
-    glas:   val("Glas")
-  };
+  return { grote: val("Grote flessen"), kleine: val("Klein flesje"), blik: val("Blikjes"), glas: val("Glas") };
 }
-
-/* Tekenen: Verzamelen → Doneren */
 function drawCollectToDonate(values){
   const pA = centerInViewBox(".verzamelen");
   const pB = centerInViewBox(".inleveren");
 
-  // lichte positionering zodat we niet door iconen lopen
-  pA.x += 10;   // iets rechts van 'Verzamelen'
-  pA.y -= 10;   // iets omhoog
-  pB.x -= 20;   // iets links van 'Inleveren/Doneren'
-  pB.y += 6;    // iets omlaag
+  pA.x += 10; pA.y -= 10;
+  pB.x -= 20; pB.y += 6;
 
-  // inkorten aan beide kanten
-  const TRIM_START = 35;  // vanaf Verzamelen
-  const TRIM_END   = 110;  // vóór Doneren stoppen
-  const { a, b } = segTrim(pA, pB, TRIM_START, TRIM_END);
+  const { a, b } = segTrim(pA, pB, 35, 110);
 
-  // schaal & kleuren (consistent met andere nieuwe lijnen)
   const maxVal = Math.max(values.grote, values.kleine, values.blik, values.glas, 1);
   const scaleW = d3.scaleLinear().domain([0, maxVal]).range([4, 20]);
   const bands = [
-    {key:"grote",  color:"#000000", w: scaleW(values.grote)},
-    {key:"kleine", color:"#1f6f32", w: scaleW(values.kleine)},
-    {key:"blik",   color:"#FFD400", w: scaleW(values.blik)},
-    {key:"glas",   color:"#A9713A", w: scaleW(values.glas)}
+    {key:"grote",  color:"#000000", w: scaleW(values.grote),  metric:"%Gedoneerd"},
+    {key:"kleine", color:"#1f6f32", w: scaleW(values.kleine), metric:"%Gedoneerd"},
+    {key:"blik",   color:"#FFD400", w: scaleW(values.blik),   metric:"%Gedoneerd"},
+    {key:"glas",   color:"#A9713A", w: scaleW(values.glas),   metric:"%Gedoneerd"}
   ];
   const gaps = 2;
   const totalH = bands.reduce((s,x)=>s+x.w,0) + gaps*(bands.length-1);
 
-  // middenlijn schaduw
   flows.append("path")
     .attr("d", offsetPath(a, b, 0))
     .attr("fill","none").attr("stroke","#111").attr("stroke-width",3)
     .attr("opacity",0.25).attr("stroke-linecap","round");
 
-  // vier banden met gelijke eindcaps
   let cursor = -totalH/2;
   bands.forEach(bd => {
     const off = cursor + bd.w/2;
-    flows.append("path")
+    const path = flows.append("path")
       .attr("d", offsetPath(a, b, off))
       .attr("fill","none").attr("stroke", bd.color).attr("stroke-width", bd.w)
-      .attr("stroke-linecap","butt");
+      .attr("stroke-linecap","butt")
+      .attr("data-label", KEY2LABEL[bd.key])
+      .attr("data-metric", bd.metric)
+      .attr("data-pct", pctFor(KEY2LABEL[bd.key], bd.metric, "%Ingeleverd"));
+    wireHover(path);
     cursor += bd.w + gaps;
   });
 }
 
-/* Aanroepen bij load/resize */
+/* ------------------ init & resize ------------------ */
+async function drawAll(){
+  flows.selectAll("*").remove();
+
+  const [topValues, buyValues, storeValues, f2cVals, c2fVals, c2tVals, v2cVals, z2dVals] = await Promise.all([
+    loadTopValues(),
+    loadBuyValues(),
+    loadStoreValues(),
+    loadFridgeToConsumeValues(),
+    loadConsumeToFridgeValues(),
+    loadConsumeToTrashValues(),
+    loadCollectToConsumeValues(),
+    loadCollectToDonateValues()
+  ]);
+
+  drawTopBands(topValues);
+  drawBuyLine(buyValues);
+  drawStoreLine(storeValues);
+  drawFridgeToConsume(f2cVals);
+  drawConsumeToFridge(c2fVals);
+  drawConsumeToTrash(c2tVals);
+  drawCollectToConsume(v2cVals);
+  drawCollectToDonate(z2dVals);
+}
+
 window.addEventListener("load", async () => {
-  const z2d = await loadCollectToDonateValues();
-  drawCollectToDonate(z2d);
+  // CSV-cache laden voor tooltips
+  if(!CSV_ROWS.length) { CSV_ROWS = await d3.csv("data.csv"); }
+  await drawAll();
 });
-window.addEventListener("resize", async () => {
-  const z2d = await loadCollectToDonateValues();
-  drawCollectToDonate(z2d);
-});
-
-
-/* Extra aanroepen */
-window.addEventListener("load", async () => {
-  const v2c = await loadCollectToConsumeValues();
-  drawCollectToConsume(v2c);
-});
-window.addEventListener("resize", async () => {
-  const v2c = await loadCollectToConsumeValues();
-  drawCollectToConsume(v2c);
-});
-
-
-/* Extra aanroepen */
-window.addEventListener("load", async () => {
-  const c2t = await loadConsumeToTrashValues();
-  drawConsumeToTrash(c2t);
-});
-window.addEventListener("resize", async () => {
-  const c2t = await loadConsumeToTrashValues();
-  drawConsumeToTrash(c2t);
-});
-
-
-
-/* Extra aanroepen zonder bestaande initTop te wijzigen */
-window.addEventListener("load", async () => {
-  const f2c = await loadFridgeToConsumeValues();
-  drawFridgeToConsume(f2c);
-  const c2f = await loadConsumeToFridgeValues();
-  drawConsumeToFridge(c2f);
-});
-window.addEventListener("resize", async () => {
-  // initTop wist flows al; onze calls tekenen daarna de extra twee banen opnieuw
-  const f2c = await loadFridgeToConsumeValues();
-  drawFridgeToConsume(f2c);
-  const c2f = await loadConsumeToFridgeValues();
-  drawConsumeToFridge(c2f);
-});
+window.addEventListener("resize", drawAll);
