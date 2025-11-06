@@ -274,6 +274,46 @@ header {
   height: auto;
 }
 
+.weggooienverhouding-label {
+  position: absolute;
+  left: calc((var(--x) + 20) * 1%);
+  top: calc(var(--y) * 1%);
+  transform: translate(-50%, -50%);
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  color: black;
+  font-weight: 700;
+  line-height: 1;
+  font-size: 1rem;
+  pointer-events: none;
+}
+
+.weggooienverhouding-label p {
+  margin: 0;
+  padding: 0;
+}
+.color-dot {
+  flex-shrink: 0;
+  width: 18px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid #000000;
+}
+
+.color-dot.groot {
+  background: black;
+}
+.color-dot.klein {
+  background: #1f6f32;
+}
+.color-dot.blik {
+  background: #ffd400;
+}
+.color-dot.glas {
+  background: #a9713a;
+}
+
 .step.kopen {
   position: absolute;
 }
