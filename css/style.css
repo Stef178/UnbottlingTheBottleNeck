@@ -56,16 +56,19 @@ header {
 .step img {
   width: 80px;
   transition: transform 0.2s;
+  z-index: 2;
 }
 .step:hover img {
   transform: scale(1.08);
 }
 .step p {
-  background: #aef59d;
+  background: #2e5b1d;
+  color: #b5f2a3;
   padding: 4px 10px;
   border-radius: 6px;
   margin-top: 0.4rem;
   display: inline-block;
+  z-index: 2;
 }
 
 .step.consumeren {
@@ -73,10 +76,31 @@ header {
 }
 .step.consumeren p {
   position: absolute;
-  top: -30px;
-  right: -24px;
+  top: 10px;
+  right: 60px;
   margin: 0;
   text-align: right;
+}
+
+.step {
+  z-index: 5;
+}
+.step-circle {
+  z-index: 1;
+}
+
+.step-circle {
+  position: absolute;
+  left: calc((var(--x) + 20) * 1%);
+  top: calc(var(--y) * 1%);
+  transform: translate(-50%, -50%);
+  width: var(--circle-size, 130px);
+  height: var(--circle-size, 130px);
+  background: #b5f2a3;
+  border: 4px solid #2e5b1d;
+  border-radius: 50%;
+  z-index: 1;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
 .node {
@@ -114,7 +138,8 @@ header {
   width: 100%;
   height: 100%;
   pointer-events: auto;
-  z-index: 2;
+  z-index: 0;
+  opacity: 1;
 }
 
 .routes path.flow-band,
@@ -319,8 +344,8 @@ header {
 }
 .step.kopen p {
   position: absolute;
-  right: 100%;
-  top: 50%;
+  top: 160px;
+  right: -3px;
   transform: translateY(-50%);
   margin: 0;
   white-space: nowrap;
@@ -339,9 +364,6 @@ header {
   width: 50px;
   height: 60px;
   transition: transform 0.2s;
-}
-.click-icon-step img:hover {
-  transform: scale(1.2);
 }
 
 .routepijl-step {

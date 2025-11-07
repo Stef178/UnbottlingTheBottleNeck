@@ -29,12 +29,24 @@
     </header>
 
     <main class="visual">
-      <div class="step kopen" style="--x: -25; --y: 57">
-        <img src="assets/icons/kopen.svg" alt="Kopen" />
+      <div
+        class="step-circle"
+        style="--x: -21.5; --y: 60; width: 190px; height: 200px"
+      ></div>
+      <div class="step kopen" style="--x: -23; --y: 58">
+        <img
+          src="assets/icons/kopen.svg"
+          alt="Kopen"
+          style="width: 90px; height: 180px"
+        />
         <p>Kopen</p>
       </div>
 
-      <div class="step opbergen" style="--x: -5; --y: 110">
+      <div
+        class="step-circle"
+        style="--x: -3; --y: 105; --circle-size: 200px"
+      ></div>
+      <div class="step opbergen" style="--x: -4; --y: 110">
         <div class="fridge-wrapper">
           <img
             id="fridge-image"
@@ -45,16 +57,32 @@
         <p>Opbergen</p>
       </div>
 
-      <div class="step consumeren" style="--x: -5; --y: 20">
-        <img src="assets/icons/consumeren.svg" alt="Consumeren" />
+      <div
+        class="step-circle"
+        style="--x: -3; --y: 20; --circle-size: 185px"
+      ></div>
+      <div class="step consumeren" style="--x: -4; --y: 20">
+        <img
+          src="assets/icons/consumeren.svg"
+          alt="Consumeren"
+          style="width: 110px; height: 180px"
+        />
         <p>Consumeren</p>
       </div>
 
-      <div class="step verzamelen" style="--x: 43; --y: 58">
+      <div
+        class="step-circle"
+        style="--x: 43; --y: 54; --circle-size: 185px"
+      ></div>
+      <div class="step verzamelen" style="--x: 46; --y: 57">
         <img src="assets/icons/recyclen.svg" alt="Verzamelen" />
         <p>Verzamelen</p>
       </div>
 
+      <div
+        class="step-circle"
+        style="--x: 35; --y: 104; --circle-size: 200px"
+      ></div>
       <div class="step weggooien" style="--x: 38; --y: 107">
         <img src="assets/icons/weggooien.svg" alt="Weggooien" />
         <p>Weggooien</p>
@@ -67,6 +95,10 @@
         />
       </div>
 
+      <div
+        class="step-circle"
+        style="--x: 75; --y: 18; width: 280px; height: 200px"
+      ></div>
       <div class="step inleveren" style="--x: 75; --y: 20">
         <img
           src="assets/icons/inleveren.svg"
@@ -76,13 +108,22 @@
         <p>Inleveren / Doneren</p>
       </div>
 
-      <div class="click-icon-step" style="--x: 1; --y: 96">
+      <div class="click-icon-step" style="--x: 2; --y: 98">
         <img src="assets/icons/click.svg" alt="Klik hier" />
       </div>
       <div class="click-icon-step" style="--x: 39; --y: 97">
         <img src="assets/icons/click.svg" alt="Klik hier" />
       </div>
-      <div class="click-icon-step" style="--x: 83; --y: 9">
+      <div class="click-icon-step" style="--x: 83; --y: 12">
+        <img src="assets/icons/click.svg" alt="Klik hier" />
+      </div>
+      <div class="click-icon-step" style="--x: 47; --y: 49">
+        <img src="assets/icons/click.svg" alt="Klik hier" />
+      </div>
+      <div class="click-icon-step" style="--x: 2; --y: 15">
+        <img src="assets/icons/click.svg" alt="Klik hier" />
+      </div>
+      <div class="click-icon-step" style="--x: -17; --y: 55">
         <img src="assets/icons/click.svg" alt="Klik hier" />
       </div>
 
@@ -92,7 +133,7 @@
       <div class="routepijl-step" style="--x: -18; --y: 95">
         <img src="assets/icons/kopenopbergenpijl.svg" alt="Klik hier" />
       </div>
-      <div class="routepijl-step" style="--x: -12; --y: 65">
+      <div class="routepijl-step" style="--x: -9; --y: 65">
         <img src="assets/icons/consumerenopbergenpijl.svg" alt="Klik hier" />
       </div>
       <div class="routepijl-step" style="--x: 1.5; --y: 65">
@@ -141,7 +182,7 @@
       </div>
       <div class="label-container" style="--x: 52; --y: 105">
         <p class="label label-green">
-          Hoeveel wordt er in verhouding weggegooid?
+          Hoeveel wordt er in<br />verhouding weggegooid?
         </p>
         <span class="arrow-green">➜</span>
       </div>
@@ -153,7 +194,7 @@
         <g id="flows"></g>
       </svg>
 
-      <div id="tooltip" aria-hidden="true"></div>
+      <div id="tooltip" aria-hidden="false"></div>
     </main>
 
     <script src="js/script.js"></script>

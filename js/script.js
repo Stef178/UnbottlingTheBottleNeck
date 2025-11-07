@@ -252,7 +252,7 @@ function drawTopBands(values) {
     { key: "glas", color: "#A9713A", metric: "%Ingeleverd" },
   ];
 
-  const gaps = 2;
+  const gaps = 0;
   const heights = bands.map((b) => w(values[b.key]));
   const totalH = heights.reduce((a, b) => a + b, 0) + gaps * (bands.length - 1);
   let yCursor = y - totalH / 2;
@@ -351,7 +351,7 @@ function drawBuyLine(values) {
     { key: "glas", color: "#A9713A", metric: "%Weggegooid" },
   ];
 
-  const gaps = 2;
+  const gaps = 0;
   const heights = bands.map((bd) => w(values[bd.key]));
   const totalH = heights.reduce((x, y) => x + y, 0) + gaps * (bands.length - 1);
 
@@ -404,10 +404,10 @@ function drawStoreLine(values) {
   const p1 = centerInViewBox(".kopen");
   const p2 = centerInViewBox(".opbergen");
 
-  const TRIM_START = 0;
-  const TRIM_END = 110;
-
-  const { a, b } = trimSegment(p1, p2, TRIM_START, TRIM_END);
+  p1.x += 40;
+  p1.y -= -10;
+  p2.x += 50;
+  p2.y += 10;
 
   const maxVal = Math.max(
     values.grote,
@@ -425,35 +425,33 @@ function drawStoreLine(values) {
     { key: "glas", color: "#A9713A", metric: "%Opgeborgen" },
   ];
 
-  const gaps = 2;
-  const heights = bands.map((bd) => w(values[bd.key]));
-  const totalH = heights.reduce((x, y) => x + y, 0) + gaps * (bands.length - 1);
+  const totalH = bands.reduce((s, bd) => s + w(values[bd.key]), 0);
 
   flows
     .append("path")
-    .attr("d", pathWithOffset(a, b, 0))
+    .attr("d", pathWithOffset(p1, p2, 0))
     .attr("fill", "none")
     .attr("stroke", "#111")
     .attr("stroke-width", 4)
     .attr("opacity", 0.25)
     .attr("stroke-linecap", "round");
 
-  let cursor = -totalH / 2;
-  bands.forEach((bd, i) => {
-    const h = heights[i];
-    const offset = cursor + h / 2;
+  let cursor = 0;
+  bands.forEach((bd) => {
+    const bw = w(values[bd.key]);
+    const offset = cursor + bw / 2;
     const path = flows
       .append("path")
-      .attr("d", pathWithOffset(a, b, offset))
+      .attr("d", pathWithOffset(p1, p2, offset))
       .attr("fill", "none")
       .attr("stroke", bd.color)
-      .attr("stroke-width", h)
+      .attr("stroke-width", bw)
       .attr("stroke-linecap", "butt")
       .attr("data-label", KEY2LABEL[bd.key])
       .attr("data-metric", bd.metric)
       .attr("data-pct", pctFor(KEY2LABEL[bd.key], bd.metric));
     wireHover(path);
-    cursor += h + gaps;
+    cursor += bw;
   });
 }
 
@@ -505,10 +503,10 @@ function drawFridgeToConsume(values) {
   const pA = centerInViewBox(".opbergen");
   const pB = centerInViewBox(".consumeren");
 
-  pA.x += 40;
-  pA.y -= 6;
-  pB.x += 40;
-  pB.y += 6;
+  pA.x += 30;
+  pA.y -= -30;
+  pB.x += 30;
+  pB.y += -40;
 
   const { a, b } = segTrim(pA, pB, 130, 130);
 
@@ -551,6 +549,7 @@ function drawFridgeToConsume(values) {
     },
   ];
 
+  const FLOW_GAP = 0;
   const totalH =
     bands.reduce((s, x) => s + x.w, 0) + FLOW_GAP * (bands.length - 1);
 
@@ -584,6 +583,11 @@ function drawFridgeToConsume(values) {
 function drawConsumeToFridge(values) {
   const pA = centerInViewBox(".consumeren");
   const pB = centerInViewBox(".opbergen");
+
+  pA.x += 35;
+  pA.y -= 70;
+  pB.x += 35;
+  pB.y += 15;
 
   const trimmed = segTrim(pA, pB, 125, 125);
 
@@ -626,6 +630,7 @@ function drawConsumeToFridge(values) {
     },
   ];
 
+  const FLOW_GAP = 0;
   const totalH =
     bands.reduce((s, x) => s + x.w, 0) + FLOW_GAP * (bands.length - 1);
 
@@ -687,7 +692,7 @@ function drawConsumeToTrash(values) {
   const pA = centerInViewBox(".consumeren");
   const pB = centerInViewBox(".weggooien");
 
-  pA.x += 15;
+  pA.x += 20;
   pA.y += 25;
   pB.x -= 10;
   pB.y -= 10;
@@ -728,7 +733,7 @@ function drawConsumeToTrash(values) {
       metric: "%Weggegooid",
     },
   ];
-  const gaps = 2;
+  const gaps = 0;
   const totalH = bands.reduce((s, x) => s + x.w, 0) + gaps * (bands.length - 1);
 
   flows
@@ -780,8 +785,8 @@ function drawCollectToConsume(values) {
 
   pA.x += 10;
   pA.y -= 30;
-  pB.x -= 20;
-  pB.y += 10;
+  pB.x -= 80;
+  pB.y += 0;
 
   const { a, b } = segTrim(pA, pB, 120, 160);
 
@@ -819,7 +824,7 @@ function drawCollectToConsume(values) {
       metric: "%Ingeleverd",
     },
   ];
-  const gaps = 2;
+  const gaps = 0;
   const totalH = bands.reduce((s, x) => s + x.w, 0) + gaps * (bands.length - 1);
 
   flows
@@ -875,9 +880,9 @@ function drawCollectToDonate(values) {
   const pB = centerInViewBox(".inleveren");
 
   pA.x += 10;
-  pA.y -= 10;
-  pB.x -= 20;
-  pB.y += 6;
+  pA.y -= 30;
+  pB.x -= 0;
+  pB.y += -13;
 
   const { a, b } = segTrim(pA, pB, 35, 110);
 
@@ -915,7 +920,7 @@ function drawCollectToDonate(values) {
       metric: "%Gedoneerd",
     },
   ];
-  const gaps = 2;
+  const gaps = 0;
   const totalH = bands.reduce((s, x) => s + x.w, 0) + gaps * (bands.length - 1);
 
   flows
