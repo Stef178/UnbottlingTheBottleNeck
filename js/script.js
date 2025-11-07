@@ -108,7 +108,7 @@ document.addEventListener("DOMContentLoaded", () => {
       trashOverlay.html(`
         <div class="trash-content">
           <div class="trash-visual">
-            <img src="assets/icons/trashlid.svg" alt="Prullenbak open" id="open-trash" />
+            <img src="assets/icons/backgroundtrash.svg" alt="Prullenbak open" id="open-trash" />
             <div class="trash-stacks" id="trash-stacks"></div>
           </div>
         </div>
@@ -128,6 +128,111 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
+const consumerenImg = d3.select("#consumeren img");
+
+consumerenImg
+  .on("mouseenter", (event) => {
+    let content = `
+      <strong style="font-size:14px; display:block; margin-bottom:6px;">
+        Totaal geconsumeerd per verpakkingssoort
+      </strong>
+    `;
+
+    const typeColors = {
+      "Klein flesje": "#1f6f32",
+      Glas: "#a9713a",
+      Blikjes: "#ffd400",
+      "Grote flessen": "#000000",
+    };
+
+    CSV_ROWS.forEach((d) => {
+      const type = d["Type verpakking"];
+      const consumed = d["Geconsumeerd"];
+      const color = typeColors[type] || null;
+
+      if (!color) return;
+
+      content += `
+        <span style="display:flex; align-items:center; gap:4px;">
+          <span style="width:12px; height:12px; background:${color}; border-radius:50%; display:inline-block;"></span>
+          ${type}: ${consumed} stuks
+        </span><br>`;
+    });
+
+    const x = event.clientX;
+    const y = event.clientY;
+
+    d3.select("#tooltip")
+      .html(content)
+      .style("opacity", 1)
+      .style("transform", `translate(${x + 12}px, ${y + 12}px)`)
+      .attr("aria-hidden", "false");
+  })
+  .on("mousemove", (event) => {
+    const x = event.clientX;
+    const y = event.clientY;
+
+    d3.select("#tooltip").style(
+      "transform",
+      `translate(${x + 12}px, ${y + 12}px)`
+    );
+  })
+  .on("mouseleave", () => {
+    d3.select("#tooltip").style("opacity", 0).attr("aria-hidden", "true");
+  });
+
+const kopenImg = d3.select(".step.kopen img");
+
+kopenImg
+  .on("mouseenter", function (event) {
+    let content =
+      '<strong style="font-size:14px; display:block; margin-bottom:8px;">' +
+      "Totaal gekocht per verpakkingssoort" +
+      "</strong>";
+
+    const typeColors = {
+      "Klein flesje": "#1f6f32",
+      Blikjes: "#ffd400",
+      "Grote flessen": "#000000",
+      Glas: "#a9713a",
+    };
+
+    CSV_ROWS.forEach((d) => {
+      const type = d["Type verpakking"];
+      const bought = d["Gekocht"];
+      const color = typeColors[type] || null;
+
+      if (!color) return;
+
+      content += `
+        <span style="display:flex; align-items:center; gap:4px;">
+          <span style="width:12px; height:12px; background:${color}; border-radius:50%; display:inline-block;"></span>
+          ${type}: ${bought} stuks
+        </span><br>`;
+    });
+
+    const x = event.clientX;
+    const y = event.clientY;
+
+    d3.select("#tooltip")
+      .html(content)
+      .style("opacity", 1)
+      .style("transform", `translate(${x + 12}px, ${y + 12}px)`)
+      .attr("aria-hidden", "false");
+  })
+  .on("mousemove", (event) => {
+    const x = event.clientX;
+    const y = event.clientY;
+
+    d3.select("#tooltip").style(
+      "transform",
+      `translate(${x + 12}px, ${y + 12}px)`
+    );
+  })
+  .on("mouseleave", () => {
+    d3.select("#tooltip").style("opacity", 0).attr("aria-hidden", "true");
+  });
+
 function fillFridge(data) {
   const shelves = {
     top: d3.select("#shelf-top"),
@@ -137,27 +242,48 @@ function fillFridge(data) {
   };
 
   const typeMap = {
-    "Klein flesje": { file: "kleinflesje", shelf: "top" },
-    Glas: { file: "glas", shelf: "middleTop" },
-    Blikjes: { file: "blikje", shelf: "middleBottom" },
-    "Grote flessen": { file: "grotefles", shelf: "bottom" },
+    "Klein flesje": {
+      file: "kleinflesje",
+      shelf: "top",
+      label: "Kleine flesjes",
+    },
+    Glas: { file: "glas", shelf: "middleTop", label: "Glas" },
+    Blikjes: { file: "blikje", shelf: "middleBottom", label: "Blikjes" },
+    "Grote flessen": {
+      file: "grotefles",
+      shelf: "bottom",
+      label: "Grote flessen",
+    },
   };
 
+  const overlay = d3.select("#fridge-overlay");
+  if (overlay.selectAll(".fridge-title").empty()) {
+    overlay
+      .append("div")
+      .attr("class", "fridge-title")
+      .html("Wat word er het<br>meest opgeborgen?");
+  }
+
   Object.values(shelves).forEach((s) => s.html(""));
+  d3.selectAll(".shelf-label").remove();
 
   data.forEach((row) => {
     const type = row["Type verpakking"];
     const info = typeMap[type];
     if (!info) return;
 
+    const shelf = shelves[info.shelf];
+
     const percentStr = String(row["%Opgeborgen"])
       .replace("%", "")
       .replace(",", ".")
       .trim();
     const percent = parseFloat(percentStr) || 0;
+
     const count = Math.max(1, Math.round((percent / 100) * 10));
 
-    const shelf = shelves[info.shelf];
+    const actualCount = parseInt(row["Opgeborgen"]) || 0;
+
     for (let i = 0; i < count; i++) {
       const img = shelf
         .append("img")
@@ -166,12 +292,28 @@ function fillFridge(data) {
         .attr("class", "item");
       setTimeout(() => img.classed("visible", true), i * 70);
     }
+
+    d3.select(".fridge-shelves")
+      .append("div")
+      .attr("class", `shelf-label shelf-label-${info.shelf}`)
+      .html(`${info.label}: ${percent.toFixed(1)}% (${actualCount} stuks)`);
   });
 }
 
 function fillTrash(data) {
+  const overlay = d3.select("#trash-overlay");
   const container = d3.select("#trash-stacks");
+
   container.html("");
+
+  if (overlay.selectAll(".trash-title").empty()) {
+    overlay
+      .append("div")
+      .attr("class", "trash-title")
+      .text(
+        "Hoeveel word er in verhouding weggegooid en\nhoeveel is het statiegeld waard per product?"
+      );
+  }
 
   const typeMap = {
     "Grote flessen": { file: "grotefles", statiegeld: "€0,25" },
@@ -192,8 +334,14 @@ function fillTrash(data) {
     const percent = parseFloat(percentStr) || 0;
     const heightCount = Math.round((percent / 100) * 10);
 
+    const actualCount = parseInt(row["Weggegooid"]) || 0;
+
     const col = container.append("div").attr("class", "trash-column");
-    col.append("div").attr("class", "trash-label").text(`${percent}% ${type}`);
+
+    col
+      .append("div")
+      .attr("class", "trash-label")
+      .html(`${percent}% ${type}<br>(${actualCount} stuks)`);
 
     for (let i = 0; i < heightCount; i++) {
       const img = col
@@ -587,7 +735,7 @@ function drawConsumeToFridge(values) {
   pA.x += 35;
   pA.y -= 70;
   pB.x += 35;
-  pB.y += 15;
+  pB.y += 50;
 
   const trimmed = segTrim(pA, pB, 125, 125);
 

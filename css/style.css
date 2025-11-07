@@ -53,6 +53,7 @@ header {
   text-align: center;
   cursor: pointer;
 }
+
 .step img {
   width: 80px;
   transition: transform 0.2s;
@@ -82,6 +83,14 @@ header {
   text-align: right;
 }
 
+.step.opbergen p {
+  position: absolute;
+  top: 90px;
+  right: -110px;
+  margin: 0;
+  text-align: right;
+}
+
 .step {
   z-index: 5;
 }
@@ -97,10 +106,9 @@ header {
   width: var(--circle-size, 130px);
   height: var(--circle-size, 130px);
   background: #b5f2a3;
-  border: 4px solid #2e5b1d;
+  border: 4px solid black;
   border-radius: 50%;
   z-index: 1;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
 .node {
@@ -119,7 +127,7 @@ header {
   gap: 6px;
 }
 .label {
-  font-size: 0.9rem;
+  font-size: 1.3rem;
   margin: 0;
 }
 .label-green {
@@ -129,7 +137,17 @@ header {
 .arrow-green {
   color: #2e5b1d;
   font-weight: 700;
-  font-size: 1.1rem;
+  font-size: 1.5rem;
+  transform: scale(4, 3);
+  display: inline-block;
+}
+
+.arrow-green-down {
+  color: #2e5b1d;
+  font-weight: 700;
+  font-size: 1.7rem;
+  transform: scale(4, 5);
+  display: inline-block;
 }
 
 .routes {
@@ -186,6 +204,20 @@ header {
   z-index: 1001;
   pointer-events: none;
 }
+
+.fridge-title {
+  position: absolute;
+  top: 180px;
+  left: 44.7%;
+  transform: translateX(-50%);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: black;
+  text-align: center;
+  line-height: 1.2;
+  z-index: 2000;
+}
+
 .shelf {
   display: flex;
   justify-content: center;
@@ -214,6 +246,39 @@ header {
   height: 270px;
   margin-top: -300px;
 }
+
+.shelf-label {
+  position: absolute;
+  right: -170px;
+  background: #7de3ea;
+  color: black;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  z-index: 2000;
+}
+
+.shelf-label-top {
+  top: 21%;
+  right: -211px;
+}
+
+.shelf-label-middleTop {
+  top: 34%;
+  right: -140px;
+}
+
+.shelf-label-middleBottom {
+  top: 49%;
+  right: -168px;
+}
+
+.shelf-label-bottom {
+  top: 62%;
+  right: -213px;
+}
 .item {
   opacity: 0;
   transform: translateY(10px);
@@ -237,19 +302,19 @@ header {
   display: flex;
 }
 #trash-overlay #open-trash {
-  width: 580px;
-  height: auto;
+  width: 610px;
+  height: 100%;
   position: relative;
   z-index: 1000;
-  top: 275px;
+  top: -15px;
 }
 .trash-stacks {
   position: absolute;
-  bottom: 23%;
-  left: 50%;
+  bottom: 1%;
+  left: 49%;
   transform: translateX(-50%);
   display: flex;
-  gap: 25px;
+  gap: 0px;
   align-items: flex-end;
   z-index: 1001;
   text-align: center;
@@ -286,6 +351,21 @@ header {
   padding: 3px 8px;
   margin-top: 6px;
   font-weight: 700;
+}
+
+.trash-title {
+  position: absolute;
+  top: 135px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #aef59d;
+  background: #2e5b1d;
+  padding: 6px 12px;
+  border-radius: 8px;
+  z-index: 2000;
+  white-space: pre-line;
 }
 
 .weggooienverhouding-icon {
