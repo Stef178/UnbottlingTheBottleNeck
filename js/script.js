@@ -233,6 +233,58 @@ kopenImg
     d3.select("#tooltip").style("opacity", 0).attr("aria-hidden", "true");
   });
 
+const verzamelenImg = d3.select(".step.verzamelen img");
+
+verzamelenImg
+  .on("mouseenter", function (event) {
+    let content =
+      '<strong style="font-size:14px; display:block; margin-bottom:8px;">' +
+      "Totaal verzameld per verpakkingssoort" +
+      "</strong>";
+
+    const typeColors = {
+      "Klein flesje": "#1f6f32",
+      Blikjes: "#ffd400",
+      "Grote flessen": "#000000",
+      Glas: "#a9713a",
+    };
+
+    CSV_ROWS.forEach((d) => {
+      const type = d["Type verpakking"];
+      const collected = d["Verzameld"];
+      const color = typeColors[type] || null;
+
+      if (!color) return;
+
+      content += `
+        <span style="display:flex; align-items:center; gap:4px;">
+          <span style="width:12px; height:12px; background:${color}; border-radius:50%; display:inline-block;"></span>
+          ${type}: ${collected} stuks
+        </span><br>`;
+    });
+
+    const x = event.clientX;
+    const y = event.clientY;
+
+    d3.select("#tooltip")
+      .html(content)
+      .style("opacity", 1)
+      .style("transform", `translate(${x + 12}px, ${y + 12}px)`)
+      .attr("aria-hidden", "false");
+  })
+  .on("mousemove", (event) => {
+    const x = event.clientX;
+    const y = event.clientY;
+
+    d3.select("#tooltip").style(
+      "transform",
+      `translate(${x + 12}px, ${y + 12}px)`
+    );
+  })
+  .on("mouseleave", () => {
+    d3.select("#tooltip").style("opacity", 0).attr("aria-hidden", "true");
+  });
+
 function fillFridge(data) {
   const shelves = {
     top: d3.select("#shelf-top"),
