@@ -101,6 +101,7 @@
       ></div>
       <div class="step inleveren" style="--x: 75; --y: 20">
         <img
+          id="inleverenIcon"
           src="assets/icons/inleveren.svg"
           alt="Inleveren"
           style="width: 150px; height: 80px"
@@ -191,7 +192,35 @@
 
       <div id="fridge-overlay"></div>
       <div id="trash-overlay"></div>
-
+      <div id="return-overlay" class="overlay">
+        <div class="return-content">
+          <img
+            src="assets/icons/inleverendonerenbackground.svg"
+            alt="Achtergrond"
+            id="return-bg"
+            style="
+              position: absolute;
+              top: 0;
+              left: 0;
+              width: 100%;
+              height: 100%;
+              z-index: 0;
+            "
+          />
+          <div
+            id="return-stacks"
+            class="return-stacks"
+            style="
+              position: absolute;
+              bottom: 0;
+              left: 0;
+              width: 100%;
+              height: 100%;
+              z-index: 1;
+            "
+          ></div>
+        </div>
+      </div>
       <svg id="routes" viewBox="0 0 1200 600" class="routes" aria-hidden="true">
         <g id="flows"></g>
       </svg>

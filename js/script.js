@@ -126,6 +126,42 @@ document.addEventListener("DOMContentLoaded", () => {
     const clickedInside = event.target.closest("#open-trash");
     if (!clickedInside) trashOverlay.classed("active", false).html("");
   });
+
+  let CSV_ROWS = [];
+  const returnBtn = d3.select(".step.inleveren");
+  const returnOverlay = d3.select("#return-overlay");
+
+  returnBtn.on("click", async () => {
+    const isActive = returnOverlay.classed("active");
+    if (!isActive) {
+      returnOverlay.classed("active", true);
+
+      returnOverlay.html(`
+      <div class="return-content">
+        <div class="return-visual">
+          <img
+            src="assets/icons/inleverendonerenbackground.svg"
+            alt="Inleveren/Doneren achtergrond"
+            id="return-bg"
+          />
+          <div id="return-stacks"></div>
+        </div>
+      </div>
+    `);
+
+      try {
+        if (!CSV_ROWS.length) CSV_ROWS = await d3.csv("data.csv");
+        fillReturn(CSV_ROWS);
+      } catch (err) {
+        console.error("Fout bij laden CSV:", err);
+      }
+    }
+  });
+
+  returnOverlay.on("click", (event) => {
+    const clickedInside = event.target.closest("#return-bg");
+    if (!clickedInside) returnOverlay.classed("active", false).html("");
+  });
 });
 
 const consumerenImg = d3.select("#consumeren img");
@@ -407,6 +443,86 @@ function fillTrash(data) {
   });
 }
 
+function fillReturn(data) {
+  const container = d3.select("#return-stacks");
+  container.html("");
+
+  const typeMap = {
+    "Grote flessen": { file: "grotefles" },
+    "Klein flesje": { file: "kleinflesje" },
+    Blikjes: { file: "blikje" },
+    Glas: { file: "glas" },
+  };
+
+  data.forEach((row) => {
+    const type = row["Type verpakking"];
+    const info = typeMap[type];
+    if (!info) return;
+
+    const inCount = parseInt(row["Ingeleverd"]) || 0;
+    const donCount = parseInt(row["Gedoneerd"]) || 0;
+
+    const inPercent =
+      parseFloat(
+        String(row["%Ingeleverd"]).replace("%", "").replace(",", ".").trim()
+      ) || 0;
+    const donPercent =
+      parseFloat(
+        String(row["%Gedoneerd"]).replace("%", "").replace(",", ".").trim()
+      ) || 0;
+
+    const inHeight = Math.round((inPercent / 100) * 10);
+    const donHeight = Math.round((donPercent / 100) * 10);
+
+    const col = container.append("div").attr("class", "return-column");
+
+    const towerWrapper = col.append("div").attr("class", "tower-wrapper");
+
+    const inCol = towerWrapper.append("div").attr("class", "tower inleveren");
+    inCol
+      .append("div")
+      .attr("class", "return-label ingeleverd")
+      .html(`Ingeleverd:<br>${inPercent}%<br>(${inCount} stuks)`);
+    for (let i = 0; i < inHeight; i++) {
+      const img = inCol
+        .append("img")
+        .attr("src", `assets/icons/${info.file}.svg`)
+        .attr("alt", `${type} ingeleverd`);
+      setTimeout(() => img.classed("visible", true), i * 80);
+    }
+
+    const donCol = towerWrapper.append("div").attr("class", "tower doneren");
+    donCol
+      .append("div")
+      .attr("class", "return-label gedoneerd")
+      .html(`Gedoneerd:<br>${donPercent}%<br>(${donCount} stuks)`);
+    for (let i = 0; i < donHeight; i++) {
+      const img = donCol
+        .append("img")
+        .attr("src", `assets/icons/${info.file}.svg`)
+        .attr("alt", `${type} gedoneerd`);
+      setTimeout(() => img.classed("visible", true), i * 80);
+    }
+  });
+
+  const bottomLabels = container.append("div").attr("class", "bottom-labels");
+  bottomLabels
+    .append("div")
+    .html("Totale<br>statiegeld waarde:<br>€2,85")
+    .attr("class", "bottom-label");
+  bottomLabels
+    .append("div")
+    .html("Totale<br>statiegeld waarde:<br>€1,80")
+    .attr("class", "bottom-label");
+  bottomLabels
+    .append("div")
+    .html("Totale<br>statiegeld waarde:<br>€2,00")
+    .attr("class", "bottom-label");
+  bottomLabels
+    .append("div")
+    .html("Totale<br>statiegeld waarde:<br>€0,40")
+    .attr("class", "bottom-label");
+}
 async function loadTopValues() {
   const rows = await d3.csv("data.csv");
   function val(type) {
